@@ -56,9 +56,12 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $customer): CustomerResource
+    public function show(Request $request, int $customer): CustomerResource
     {
-        $result = $this->__checkIdExists($customer);
+        $withDomain = $request->query('withDomain') ?? false;
+        $withSsl = $request->query('withSsl') ?? false;
+
+        $result = $this->__checkIdExists($customer, $withDomain, $withSsl);
         return new CustomerResource($result);
     }
 
@@ -147,12 +150,18 @@ class CustomerController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Data bayar berhasil ditambah.']);
+            'message' => 'Data bayar berhasil ditambah.'
+        ]);
     }
 
-    private function __checkIdExists(int $id)
+    private function __checkIdExists(int $id, bool $domain = false, bool $ssl = false)
     {
-        $customer = Customer::where('id', $id)->first();
+        $customer = Customer::where('id', $id);
+
+        if ($domain) $customer->with('domainMaterial');
+        if ($ssl) $customer->with('sslMaterial');
+
+        $customer = $customer->first();
         if (!$customer) {
             throw new HttpResponseException(response()->json([
                 'success' => false,

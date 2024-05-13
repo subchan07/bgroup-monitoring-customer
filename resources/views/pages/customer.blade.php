@@ -46,6 +46,20 @@
                                     </td>
                                 </tr>
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total Harga</td>
+                                    <td id="tfootTotalHargaText">-</td>
+                                </tr>
+                                <tr>
+                                    <td id="tfootPotentialProfitThisYear">Potensi Profit</td>
+                                    <td id="tfootPotentialProfitThisYearText">-</td>
+                                </tr>
+                                <tr>
+                                    <td id="tfootPotentialProfitNextYear">Potensi Profit</td>
+                                    <td id="tfootPotentialProfitNextYearText">-</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -228,18 +242,27 @@
     <script src="{{ asset('assets/js/select2.js') }}"></script>
 
     <script>
-        const tbody = $('#tbodyCustomer'),
-            addForm = $('#addForm'),
-            updateForm = $('#updateForm'),
-            paymentForm = $('#paymentForm'),
-            selectDomain = $('.select-domain'),
-            selectHosting = $('.select-hosting'),
-            selectSsl = $('.select-ssl')
+        const tbody = $('#tbodyCustomer')
+        const addForm = $('#addForm')
+        const updateForm = $('#updateForm')
+        const paymentForm = $('#paymentForm')
+        const selectDomain = $('.select-domain')
+        const selectHosting = $('.select-hosting')
+        const selectSsl = $('.select-ssl')
+
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
+
+        // Tfoot table
+        let tfootTotalHargaText = $('#tfootTotalHargaText')
+        let tfootPotentialProfitThisYearText = $('#tfootPotentialProfitThisYearText')
+        let tfootPotentialProfitNextYearText = $('#tfootPotentialProfitNextYearText')
+        $('#tfootPotentialProfitThisYear').html(`Potensi Profit ${currentYear}`)
+        $('#tfootPotentialProfitNextYear').html(`Potensi Profit ${nextYear}`)
 
         $(() => {
             // Muat data customer saat halaman pertama kali dimuat
             getAllCustomer();
-            getAllMaterial();
 
             // Menangani submit form tambah
             addForm.on('submit', (event) => {
@@ -327,8 +350,7 @@
             });
 
             $('#tbodyCustomer').on('click', '.btn-hapus', (event) => {
-                const clickedEl = $(event.target)
-                const id = clickedEl.closest('tr').data('id');
+                const id = $(event.target).closest('tr').data('id')
 
                 Swal.fire({
                     title: "Apakah anda yakin?",
@@ -353,10 +375,12 @@
             const idEl = clickedEl.closest('tr').data('id');
 
             $.ajax({
-                url: `/api/customer/${idEl}`,
+                url: `/api/customer/${idEl}?withDomain=true&withSsl=true`,
                 type: "GET",
                 beforeSend: () => setButtonDisabled($('.btn-action'), true),
-                complete: () => setButtonDisabled($('.btn-action'), false),
+                complete: () => {
+                    setButtonDisabled($('.btn-action'), false)
+                },
                 success: (result, status) => {
                     const {
                         id,
@@ -366,10 +390,11 @@
                         price,
                         domain_material_id,
                         hosting_material_id,
-                        ssl_material_id
+                        ssl_material_id,
+                        sslMaterial,
+                        domainMaterial
                     } = result.data
 
-                    // Isi nilai form dengan data customer yang akan diupdate
                     $('#inputIdEdit').val(id);
                     $('#inputNameEdit').val(name);
                     $('#inputDomainEdit').val(domain);
@@ -379,8 +404,7 @@
                     $('#inputHostingMaterialEdit').val(hosting_material_id);
                     $('#inputSslMaterialEdit').val(ssl_material_id);
 
-                    // Tampilkan modal edit
-                    $('#editCustomerModal').modal('show');
+                    $('#editCustomerModal').modal('show')
                 },
                 error: (xhr, status, error) => {
                     const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
@@ -458,22 +482,16 @@
 
 
         const getAllMaterial = () => {
-            $.get('/api/material', (result, status) => {
+            $.get('/api/material?unused_by_customers=true', (result, status) => {
                 const results = result.data;
-
                 let optionDomain = '<option selected value="">-- Pilih --</option>',
                     optionHosting = '<option selected value="">-- Pilih --</option>',
                     optionSsl = '<option selected value="">-- Pilih --</option>'
 
                 results.forEach(data => {
-                    if (data.material === 'hosting') optionHosting +=
-                        `<option value="${data.id}">${data.item}</option>`
-
-                    if (data.material == 'domain') optionDomain +=
-                        `<option value="${data.id}">${data.item}</option>`
-
-                    if (data.material == 'ssl') optionSsl +=
-                        `<option value="${data.id}">${data.item}</option>`
+                    if (data.material === 'hosting') optionHosting += `<option value="${data.id}">${data.item}</option>`
+                    if (data.material == 'domain') optionDomain += `<option value="${data.id}">${data.item}</option>`
+                    if (data.material == 'ssl') optionSsl +=`<option value="${data.id}">${data.item}</option>`
                 });
 
                 selectDomain.html(optionDomain)
@@ -484,34 +502,50 @@
 
         // Fungsi untuk mendapatkan semua data customer
         const getAllCustomer = () => {
-            resetDataTable('.table')
+            resetDataTable('.table');
             $.get('/api/customer', (result, status) => {
                 const results = result.data;
-
                 let htmlContent = '';
+                let totalHarga = 0;
+                let potentialProfitThisYear = 0;
+                let potentialProfitNextYear = 0;
+
                 results.forEach(data => {
+                    const year = new Date(data.due_date).getFullYear();
+                    const price = parseFloat(data.price);
+
                     htmlContent += displayTbody(data);
+                    totalHarga += price;
+                    if (currentYear === year) potentialProfitThisYear += price;
+                    if (nextYear === year) potentialProfitNextYear += price;
                 });
 
                 if (results.length === 0) htmlContent +=
-                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>'
+                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>';
 
                 tbody.html(htmlContent);
-                if (results.length > 0) loadDataTable('.table')
+                if (results.length > 0) {
+                    loadDataTable('.table');
+                    tfootTotalHargaText.html(rupiah(totalHarga));
+                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear));
+                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear));
+                }
+
+                getAllMaterial();
             }, 'json');
         };
 
         // Fungsi untuk membangun HTML untuk menampilkan data customer
         const displayTbody = (data) => {
-            const domainMaterial = data.domainMaterial
-            const hostingMaterial = data.hostingMaterial
-            const sslMaterial = data.sslMaterial
             const {
                 id,
                 name,
                 domain,
                 due_date,
                 price,
+                domainMaterial,
+                hostingMaterial,
+                sslMaterial,
             } = data;
 
             return `<tr data-id="${id}">

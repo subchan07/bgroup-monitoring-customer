@@ -19,12 +19,25 @@ class MaterialController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): MaterialCollection
+    public function index(Request $request)
     {
         $materials = Material::orderBy('due_date');
 
-        $filter = $request->query('material');
-        if ($filter && $filter !== 'all') $materials->where('material', $filter);
+        $filterMaterial = $request->query('material');
+        $unusedByCustomers = $request->query('unused_by_customers');
+
+        if ($filterMaterial && $filterMaterial !== 'all') {
+            $materials->where('material', $filterMaterial);
+        }
+
+        if ($unusedByCustomers) {
+            $materials->whereNotExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('customers')
+                    ->whereRaw('customers.ssl_material_id = materials.id')
+                    ->orWhereRaw('customers.domain_material_id = materials.id');
+            });
+        }
 
         $materials = $materials->get();
 

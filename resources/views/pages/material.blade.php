@@ -53,6 +53,20 @@
                                     </td>
                                 </tr>
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total Harga</td>
+                                    <td id="tfootTotalHargaText">-</td>
+                                </tr>
+                                <tr>
+                                    <td id="tfootPotentialProfitThisYear">Potensi Profit</td>
+                                    <td id="tfootPotentialProfitThisYearText">-</td>
+                                </tr>
+                                <tr>
+                                    <td id="tfootPotentialProfitNextYear">Potensi Profit</td>
+                                    <td id="tfootPotentialProfitNextYearText">-</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -80,9 +94,11 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputBillingCycle" class="col-sm-3 col-form-label">Siklus Tagihan <span class="text-danger">*</span></label>
+                    <label for="inputBillingCycle" class="col-sm-3 col-form-label">Siklus Tagihan <span
+                            class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="text" name="billing_cycle" id="inputBillingCycle" class="form-control" placeholder="per 1 tahun..." required />
+                        <input type="text" name="billing_cycle" id="inputBillingCycle" class="form-control"
+                            placeholder="per 1 tahun..." required />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -130,21 +146,24 @@
                     <label for="inputPaymentAmountEdit" class="col-sm-3 col-form-label">Nilai Bayar
                         <span class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="number" name="payment_amount" id="inputPaymentAmountEdit" class="form-control"
+                        <input type="number" name="price" id="inputPaymentAmountEdit" class="form-control"
                             step="0.01" required />
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputBillingCycleEdit" class="col-sm-3 col-form-label">Siklus Tagihan <span class="text-danger">*</span></label>
+                    <label for="inputBillingCycleEdit" class="col-sm-3 col-form-label">Siklus Tagihan <span
+                            class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="text" name="billing_cycle" id="inputBillingCycleEdit" class="form-control" placeholder="per 1 tahun..." required />
+                        <input type="text" name="billing_cycle" id="inputBillingCycleEdit" class="form-control"
+                            placeholder="per 1 tahun..." required />
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="inputDueDatePaymentEdit" class="col-sm-3 col-form-label">Batas Waktu
                         <span class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="date" name="due_date" id="inputDueDatePaymentEdit" class="form-control" required />
+                        <input type="date" name="due_date" id="inputDueDatePaymentEdit" class="form-control"
+                            required />
                         <p class="text-muted my-0">Ubah untuk data bayar berikutnya.</p>
                     </div>
                 </div>
@@ -225,7 +244,17 @@
         const addForm = $('#addForm');
         const updateForm = $('#updateForm');
         const paymentForm = $('#paymentForm');
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
 
+        // tfoot table
+        let tfootTotalHargaText = $('#tfootTotalHargaText')
+        let tfootPotentialProfitThisYearText = $('#tfootPotentialProfitThisYearText')
+        let tfootPotentialProfitNextYearText = $('#tfootPotentialProfitNextYearText')
+        $('#tfootPotentialProfitThisYear').html(`Potensi Profit ${currentYear}`)
+        $('#tfootPotentialProfitNextYear').html(`Potensi Profit ${nextYear}`)
+
+        // filter material
         const filterMaterial = localStorage.getItem('filter-material') ?? 'all'
         $(`.filterButton[data-filter=${filterMaterial}]`).addClass('btn-primary').removeClass('btn-outline-primary')
 
@@ -461,18 +490,33 @@
 
             resetDataTable('.table')
             $.get(`/api/material${queryParam}`, (result, status) => {
-                const datas = result.data;
+                const datas = result.data
 
-                let htmlContent = '';
+                let htmlContent = ''
+                let totalHarga = 0
+                let potentialProfitThisYear = 0
+                let potentialProfitNextYear = 0
+
                 datas.forEach(data => {
+                    let year = new Date(data.due_date).getFullYear()
+                    let price = parseFloat(data.price)
+
                     htmlContent += displayTbody(data);
+                    totalHarga += price
+                    if (currentYear === year) potentialProfitThisYear += price
+                    if (nextYear === year) potentialProfitNextYear += price
                 });
 
                 if (datas.length === 0) htmlContent +=
                     '<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>'
 
                 tbody.html(htmlContent);
-                if (datas.length > 0) loadDataTable('.table')
+                if (datas.length > 0) {
+                    loadDataTable('.table')
+                    tfootTotalHargaText.html(rupiah(totalHarga))
+                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear))
+                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear))
+                }
             }, 'json');
         };
 
@@ -489,7 +533,7 @@
 
             return `<tr data-id="${id}">
                 <td>${item}</td>
-                <td>${rupiah(price)} <small class="d-block">${billing_cycle}</small></td>
+                <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
                 <td>${due_date}</td>
                 <td>${material}</td>
                 <td>
