@@ -22,7 +22,7 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Nama</th>
+                                    <th>Item</th>
                                     <th>Domain</th>
                                     <th>Domain Material</th>
                                     <th>Hosting Material</th>
@@ -75,7 +75,7 @@
             @csrf
             <div class="modal-body">
                 <div class="form-group row">
-                    <label for="inputName" class="col-sm-3 col-form-label">Nama <span class="text-danger">*</span></label>
+                    <label for="inputName" class="col-sm-3 col-form-label">Item <span class="text-danger">*</span></label>
                     <div class="col-sm-9">
                         <input type="text" name="name" id="inputName" class="form-control" required />
                     </div>
@@ -140,7 +140,7 @@
             <div class="modal-body">
                 <input type="hidden" id="inputIdEdit">
                 <div class="form-group row">
-                    <label for="inputNameEdit" class="col-sm-3 col-form-label">Nama <span
+                    <label for="inputNameEdit" class="col-sm-3 col-form-label">Item <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
                         <input type="text" name="name" id="inputNameEdit" class="form-control" required />
@@ -192,7 +192,7 @@
             <div class="modal-body">
                 <input type="hidden" name="customer_id" id="inputIdPayment">
                 <div class="form-group row">
-                    <label for="inputCustomerNamePayment" class="col-sm-3 col-form-label">Nama</label>
+                    <label for="inputCustomerNamePayment" class="col-sm-3 col-form-label">Item</label>
                     <div class="col-sm-9">
                         <input type="text" id="inputCustomerNamePayment" class="form-control" readonly />
                     </div>
@@ -264,124 +264,138 @@
             // Muat data customer saat halaman pertama kali dimuat
             getAllCustomer();
 
-            // Menangani submit form tambah
-            addForm.on('submit', (event) => {
-                event.preventDefault();
-                const formData = new FormData(addForm[0]);
+            // Event delegation untuk form submit
+            addForm.submit((event) => {
+                event.preventDefault()
+                handleFormSubmit(addForm, '/api/customer', 'POST')
+            })
 
-                $.ajax({
-                    url: '/api/customer',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllCustomer()
-                        toastFlashMessage(results.message, status);
-                        addForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            });
-
-            // Menangani submit form update
-            updateForm.on('submit', (event) => {
-                event.preventDefault();
-                const dataForm = new FormData(updateForm[0]);
+            updateForm.submit((event) => {
+                event.preventDefault()
                 const customerId = $('#inputIdEdit').val();
+                handleFormSubmit(updateForm, `/api/customer/${customerId}`, 'POST')
+            })
 
-                $.ajax({
-                    url: `/api/customer/${customerId}`,
-                    type: 'POST',
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllCustomer()
-                        toastFlashMessage(results.message, status)
-                        updateForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            });
+            paymentForm.submit((event) => {
+                event.preventDefault()
+                handleFormSubmit(paymentForm, `/api/customer/bayar`, 'POST')
+            })
 
-            paymentForm.on('submit', (event) => {
-                event.preventDefault();
-                const dataForm = new FormData(paymentForm[0]);
-                const customerId = $('#inputIdPayment').val();
-
-                $.ajax({
-                    url: `/api/customer/bayar`,
-                    type: 'POST',
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllCustomer()
-                        toastFlashMessage(results.message, status)
-                        paymentForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            });
-
-            $('#tbodyCustomer').on('click', '.btn-hapus', (event) => {
+            // Event delegation untuk tombol klik di dalam tbodyMaterial
+            tbody.on('click', '.btn-hapus', (event) => {
                 const id = $(event.target).closest('tr').data('id')
+                handleShowConfirmDelete(id)
+            });
 
-                Swal.fire({
-                    title: "Apakah anda yakin?",
-                    text: "Data ini tidak dapat dikembalikan!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Hapus!",
-                    cancelButtonText: "Batal",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        handleHapusButtonClick(id)
-                    }
-                });
+            tbody.on('click', '.btn-edit', (event) => {
+                const idEl = $(event.target).closest('tr').data('id');
+                handleEditButtonClick(idEl)
+            });
+
+            tbody.on('click', '.btn-bayar', (event) => {
+                const idEl = $(event.target).closest('tr').data('id');
+                handleBayarButtonClick(idEl);
             });
         });
 
-        // Event delegation untuk tombol klik di dalam tbodyCustomer
-        $('#tbodyCustomer').on('click', '.btn-edit', (event) => {
-            const clickedEl = $(event.target)
-            const idEl = clickedEl.closest('tr').data('id');
+        // Fungsi untuk mendapatkan semua data material
+        const getAllMaterial = () => {
+            $.get('/api/material?unused_by_customers=true', (result, status) => {
+                const results = result.data;
 
+                selectDomain.html('<option selected value="">-- Pilih --</option>')
+                selectHosting.html('<option selected value="">-- Pilih --</option>')
+                selectSsl.html('<option selected value="">-- Pilih --</option>')
+
+                results.forEach(data => {
+                    if (data.material === 'hosting')
+                        selectHosting.append(`<option value="${data.id}">${data.item}</option>`)
+                    if (data.material == 'domain')
+                        selectDomain.append(`<option value="${data.id}">${data.item}</option>`)
+                    if (data.material == 'ssl')
+                        selectSsl.append(`<option value="${data.id}">${data.item}</option>`)
+                });
+            }, 'json');
+        }
+
+        // Fungsi untuk mendapatkan semua data customer
+        const getAllCustomer = () => {
+            resetDataTable('.table');
+            $.get('/api/customer', (result, status) => {
+                const results = result.data;
+                let totalHarga = 0,
+                    potentialProfitThisYear = 0,
+                    potentialProfitNextYear = 0
+
+                tbody.html('')
+                results.forEach(data => {
+                    const year = new Date(data.due_date).getFullYear();
+                    const price = parseFloat(data.price);
+
+                    totalHarga += price;
+                    if (currentYear === year) potentialProfitThisYear += price;
+                    if (nextYear === year) potentialProfitNextYear += price;
+
+                    tbody.append(displayTbody(data))
+                });
+
+                if (results.length === 0) tbody.append(
+                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
+
+                if (results.length > 0) {
+                    tfootTotalHargaText.html(rupiah(totalHarga));
+                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear));
+                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear));
+
+                    loadDataTable('.table');
+                }
+
+                getAllMaterial();
+            }, 'json');
+        };
+
+        // Fungsi untuk membangun HTML untuk menampilkan data customer
+        const displayTbody = (data) => {
+            const {
+                id,
+                name,
+                domain,
+                due_date,
+                price,
+                domainMaterial,
+                hostingMaterial,
+                sslMaterial,
+            } = data;
+
+            return `<tr data-id="${id}">
+                        <td>${name}</td>
+                        <td>${domain}</td>
+                        <td>${domainMaterial === null ? '-' : domainMaterial.item}</td>
+                        <td>${hostingMaterial === null ? '-' : hostingMaterial.item}</td>
+                        <td>${sslMaterial === null ? '-' : sslMaterial.item}</td>
+                        <td>${due_date}</td>
+                        <td>${rupiah(price)}</td>
+                        <td>
+                            <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
+                            <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
+                            <button class="btn-hapus btn btn-sm btn-danger btn-action">Hapus</button>
+                        </td>
+                    </tr>`;
+        };
+
+        // HANDLE FUNCTION
+
+        // Fungsi untuk menangani klik tombol edit
+        const handleEditButtonClick = (idEl) => {
             $.ajax({
                 url: `/api/customer/${idEl}?withDomain=true&withSsl=true`,
                 type: "GET",
                 beforeSend: () => setButtonDisabled($('.btn-action'), true),
-                complete: () => {
-                    setButtonDisabled($('.btn-action'), false)
-                },
+                complete: () => setButtonDisabled($('.btn-action'), false),
                 success: (result, status) => {
+                    const selectDomainEdit = $('#inputDomainMaterialEdit')
+                    const selectSslEdit = $('#inputSslMaterialEdit')
+
                     const {
                         id,
                         name,
@@ -395,14 +409,25 @@
                         domainMaterial
                     } = result.data
 
+                    // hapus elemen select option old-material
+                    $('.old-material').remove()
+
+                    // tambahkan select option edit
+                    if (domainMaterial) selectDomainEdit.append(
+                        `<option class="old-material" value="${domainMaterial.id}">${domainMaterial.item}</option>`
+                        )
+                    if (sslMaterial) selectSslEdit.append(
+                        `<option class="old-material" value="${sslMaterial.id}">${sslMaterial.item}</option>`
+                        )
+
                     $('#inputIdEdit').val(id);
                     $('#inputNameEdit').val(name);
                     $('#inputDomainEdit').val(domain);
                     $('#inputDueDateEdit').val(due_date);
                     $('#inputPriceEdit').val(price);
-                    $('#inputDomainMaterialEdit').val(domain_material_id);
                     $('#inputHostingMaterialEdit').val(hosting_material_id);
-                    $('#inputSslMaterialEdit').val(ssl_material_id);
+                    selectDomainEdit.val(domain_material_id);
+                    selectSslEdit.val(ssl_material_id);
 
                     $('#editCustomerModal').modal('show')
                 },
@@ -413,16 +438,7 @@
                     flashMessage("Error", errorMessage, status);
                 }
             })
-        });
-
-        $('#tbodyCustomer').on('click', '.btn-bayar', (event) => {
-            const clickedEl = $(event.target)
-            const idEl = clickedEl.closest('tr').data('id');
-            handleBayarButtonClick(idEl);
-        });
-
-
-        // HANDLE FUNCTION
+        }
 
         // Fungsi untuk menangani klik tombol Bayar
         const handleBayarButtonClick = (idEl) => {
@@ -460,10 +476,28 @@
             })
         };
 
+        // Fungsi untuk menangani klik konfirmasi tombol Hapus
+        const handleShowConfirmDelete = (idEl) => {
+            Swal.fire({
+                title: "Apakah anda yakin?",
+                text: "Data ini tidak dapat dikembalikan!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Hapus!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    handleHapusButtonClick(idEl)
+                }
+            });
+        }
+
         // Fungsi untuk menangani klik tombol Hapus
-        const handleHapusButtonClick = (id) => {
+        const handleHapusButtonClick = (idEl) => {
             $.ajax({
-                url: `/api/customer/${id}`,
+                url: `/api/customer/${idEl}`,
                 type: "DELETE",
                 cache: false,
                 beforeSend: () => setButtonDisabled($('.btn-action'), true),
@@ -480,88 +514,31 @@
             });
         };
 
+        // fungsi untuk form submit
+        const handleFormSubmit = (form, url, method) => {
+            const dataForm = new FormData(form[0]);
 
-        const getAllMaterial = () => {
-            $.get('/api/material?unused_by_customers=true', (result, status) => {
-                const results = result.data;
-                let optionDomain = '<option selected value="">-- Pilih --</option>',
-                    optionHosting = '<option selected value="">-- Pilih --</option>',
-                    optionSsl = '<option selected value="">-- Pilih --</option>'
-
-                results.forEach(data => {
-                    if (data.material === 'hosting') optionHosting += `<option value="${data.id}">${data.item}</option>`
-                    if (data.material == 'domain') optionDomain += `<option value="${data.id}">${data.item}</option>`
-                    if (data.material == 'ssl') optionSsl +=`<option value="${data.id}">${data.item}</option>`
-                });
-
-                selectDomain.html(optionDomain)
-                selectHosting.html(optionHosting)
-                selectSsl.html(optionSsl)
-            }, 'json');
-        }
-
-        // Fungsi untuk mendapatkan semua data customer
-        const getAllCustomer = () => {
-            resetDataTable('.table');
-            $.get('/api/customer', (result, status) => {
-                const results = result.data;
-                let htmlContent = '';
-                let totalHarga = 0;
-                let potentialProfitThisYear = 0;
-                let potentialProfitNextYear = 0;
-
-                results.forEach(data => {
-                    const year = new Date(data.due_date).getFullYear();
-                    const price = parseFloat(data.price);
-
-                    htmlContent += displayTbody(data);
-                    totalHarga += price;
-                    if (currentYear === year) potentialProfitThisYear += price;
-                    if (nextYear === year) potentialProfitNextYear += price;
-                });
-
-                if (results.length === 0) htmlContent +=
-                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>';
-
-                tbody.html(htmlContent);
-                if (results.length > 0) {
-                    loadDataTable('.table');
-                    tfootTotalHargaText.html(rupiah(totalHarga));
-                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear));
-                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear));
+            $.ajax({
+                url: url,
+                type: method,
+                data: dataForm,
+                processData: false,
+                contentType: false,
+                beforeSend: () => setButtonDisabled($('.btn-submit'), true),
+                complete: () => setButtonDisabled($('.btn-submit'), false),
+                success: (results, status) => {
+                    getAllCustomer()
+                    toastFlashMessage(results.message, status)
+                    form[0].reset()
+                    $('.modal').modal('hide')
+                },
+                error: (xhr, status, error) => {
+                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
+                            .errors) :
+                        'Terjadi kesalahan saat memuat data.';
+                    flashMessage("Error", errorMessage, status);
                 }
-
-                getAllMaterial();
-            }, 'json');
-        };
-
-        // Fungsi untuk membangun HTML untuk menampilkan data customer
-        const displayTbody = (data) => {
-            const {
-                id,
-                name,
-                domain,
-                due_date,
-                price,
-                domainMaterial,
-                hostingMaterial,
-                sslMaterial,
-            } = data;
-
-            return `<tr data-id="${id}">
-                        <td>${name}</td>
-                        <td>${domain}</td>
-                        <td>${domainMaterial === null ? '-' : domainMaterial.item}</td>
-                        <td>${hostingMaterial === null ? '-' : hostingMaterial.item}</td>
-                        <td>${sslMaterial === null ? '-' : sslMaterial.item}</td>
-                        <td>${due_date}</td>
-                        <td>${rupiah(price)}</td>
-                        <td>
-                            <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
-                            <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
-                            <button class="btn-hapus btn btn-sm btn-danger btn-action">Hapus</button>
-                        </td>
-                    </tr>`;
-        };
+            });
+        }
     </script>
 @endpush

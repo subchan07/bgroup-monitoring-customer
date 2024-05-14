@@ -58,15 +58,13 @@
             $.get('/api/payment', (result, status) => {
                 const results = result.data
 
-                let htmlContent = '';
+                tbody.html('')
                 results.forEach(data => {
-                    htmlContent += displayTbody(data);
+                    tbody.append(displayTbody(data));
                 });
 
-                if (results.length === 0) htmlContent +=
-                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>'
+                if (results.length === 0) tbody.append('<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
 
-                tbody.html(htmlContent);
                 if (results.length > 0) loadDataTable('.table')
             }, 'json');
         };

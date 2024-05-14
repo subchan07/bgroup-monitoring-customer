@@ -164,7 +164,6 @@
                     <div class="col-sm-9">
                         <input type="date" name="due_date" id="inputDueDatePaymentEdit" class="form-control"
                             required />
-                        <p class="text-muted my-0">Ubah untuk data bayar berikutnya.</p>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -262,110 +261,6 @@
             // Muat data material saat halaman pertama kali dimuat
             getAllMaterial(filterMaterial);
 
-            // Menangani submit form tambah
-            addForm.on('submit', (event) => {
-                event.preventDefault();
-                const formData = new FormData(addForm[0]);
-
-                $.ajax({
-                    url: '/api/material',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllMaterial()
-                        toastFlashMessage(results.message, status);
-                        addForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            });
-
-            // Menangani submit form update
-            updateForm.on('submit', (event) => {
-                event.preventDefault();
-                const dataForm = new FormData(updateForm[0]);
-                const materialId = $('#inputIdEdit').val();
-
-                $.ajax({
-                    url: `/api/material/${materialId}`,
-                    type: 'POST',
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllMaterial()
-                        toastFlashMessage(results.message, status)
-                        updateForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            });
-
-            paymentForm.on('submit', (event) => {
-                event.preventDefault();
-                const dataForm = new FormData(paymentForm[0])
-
-                $.ajax({
-                    url: `/api/material/bayar`,
-                    type: 'POST',
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: () => setButtonDisabled($('.btn-submit'), true),
-                    complete: () => setButtonDisabled($('.btn-submit'), false),
-                    success: (results, status) => {
-                        getAllMaterial()
-                        toastFlashMessage(results.message, status)
-                        updateForm[0].reset()
-                        $('.modal').modal('hide')
-                    },
-                    error: (xhr, status, error) => {
-                        const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                                .errors) :
-                            'Terjadi kesalahan saat memuat data.';
-                        flashMessage("Error", errorMessage, status);
-                    }
-                });
-            })
-
-            $('#tbodyMaterial').on('click', '.btn-hapus', (event) => {
-                const clickedEl = $(event.target)
-                const id = clickedEl.closest('tr').data('id');
-
-                Swal.fire({
-                    title: "Apakah anda yakin?",
-                    text: "Data ini tidak dapat dikembalikan!",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Hapus!",
-                    cancelButtonText: "Batal",
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        handleHapusButtonClick(id)
-                    }
-                });
-            });
-
             $('.filterButton').on('click', (event) => {
                 const clickedVal = event.target.getAttribute('data-filter')
                 getAllMaterial(clickedVal);
@@ -374,15 +269,106 @@
                 $('.filterButton').addClass('btn-outline-primary').removeClass('btn-primary')
                 $(event.target).addClass('btn-primary').removeClass(
                     'btn-outline-primary')
-
             })
+
+            // Event delegation untuk form submit
+            addForm.submit((event) => {
+                event.preventDefault()
+                handleFormSubmit(addForm, '/api/material', 'POST')
+            })
+
+            updateForm.submit((event) => {
+                event.preventDefault()
+                const materialId = $('#inputIdEdit').val();
+                handleFormSubmit(updateForm, `/api/material/${materialId}`, 'POST')
+            })
+
+            paymentForm.submit((event) => {
+                event.preventDefault()
+                handleFormSubmit(paymentForm, `/api/material/bayar`, 'POST')
+            })
+
+            // Event delegation untuk tombol klik di dalam tbodyMaterial
+            tbody.on('click', '.btn-hapus', (event) => {
+                const idEl = $(event.target).closest('tr').data('id');
+                handleShowConfirmDelete(idEl)
+            });
+
+            tbody.on('click', '.btn-edit', (event) => {
+                const idEl = $(event.target).closest('tr').data('id');
+                handleEditButtonClick(idEl)
+            });
+
+            tbody.on('click', '.btn-bayar', (event) => {
+                const idEl = $(event.target).closest('tr').data('id');
+                handleBayarButtonClick(idEl);
+            });
         });
 
-        // Event delegation untuk tombol klik di dalam tbodyMaterial
-        $('#tbodyMaterial').on('click', '.btn-edit', (event) => {
-            const clickedEl = $(event.target)
-            const idEl = clickedEl.closest('tr').data('id');
+        // Fungsi untuk mendapatkan semua data material
+        const getAllMaterial = (filter) => {
+            const addQueryParam = filter ? `?material=${filter}` : ''
 
+            resetDataTable('.table')
+            $.get(`/api/material${addQueryParam}`, (result, status) => {
+                const results = result.data
+                let totalHarga = 0,
+                    potentialProfitThisYear = 0,
+                    potentialProfitNextYear = 0
+
+                tbody.html('');
+                results.forEach(data => {
+                    let year = new Date(data.due_date).getFullYear()
+                    let price = parseFloat(data.price)
+
+                    totalHarga += price
+                    if (currentYear === year) potentialProfitThisYear += price
+                    if (nextYear === year) potentialProfitNextYear += price
+
+                    tbody.append(displayTbody(data))
+                });
+
+                if (results.length === 0) tbody.append(
+                    '<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>')
+
+                if (results.length > 0) {
+                    tfootTotalHargaText.html(rupiah(totalHarga))
+                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear))
+                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear))
+
+                    loadDataTable('.table')
+                }
+            }, 'json');
+        };
+
+        // Fungsi untuk membangun HTML untuk menampilkan data material
+        const displayTbody = (data) => {
+            const {
+                id,
+                item,
+                price,
+                billing_cycle,
+                due_date,
+                material
+            } = data;
+
+            return `<tr data-id="${id}">
+                <td>${item}</td>
+                <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
+                <td>${due_date}</td>
+                <td>${material}</td>
+                <td>
+                    <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
+                    <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
+                    <button class="btn-hapus btn btn-sm btn-danger btn-action">Hapus</button>
+                </td>
+            </tr>`;
+        };
+
+        // HANDLE FUNCTION
+
+        // Fungsi untuk menangani klik tombol edit
+        const handleEditButtonClick = (idEl) => {
             $.ajax({
                 url: `/api/material/${idEl}`,
                 type: "GET",
@@ -416,16 +402,7 @@
                     flashMessage("Error", errorMessage, status);
                 }
             })
-        });
-
-        $('#tbodyMaterial').on('click', '.btn-bayar', (event) => {
-            const clickedEl = $(event.target)
-            const idEl = clickedEl.closest('tr').data('id');
-            handleBayarButtonClick(idEl);
-        });
-
-
-        // HANDLE FUNCTION
+        }
 
         // Fungsi untuk menangani klik tombol Bayar
         const handleBayarButtonClick = (idEl) => {
@@ -463,10 +440,28 @@
             })
         };
 
+        // Fungsi untun mengangi klik konfirmasi tombol hapus
+        const handleShowConfirmDelete = (idEl) => {
+            Swal.fire({
+                title: "Apakah anda yakin?",
+                text: "Data ini tidak dapat dikembalikan!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Hapus!",
+                cancelButtonText: "Batal",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    handleHapusButtonClick(idEl)
+                }
+            });
+        }
+
         // Fungsi untuk menangani klik tombol Hapus
-        const handleHapusButtonClick = (id) => {
+        const handleHapusButtonClick = (idEl) => {
             $.ajax({
-                url: `/api/material/${id}`,
+                url: `/api/material/${idEl}`,
                 type: "DELETE",
                 cache: false,
                 beforeSend: () => setButtonDisabled($('.btn-action'), true),
@@ -483,65 +478,31 @@
             });
         };
 
+        // fungsi untuk form submit
+        const handleFormSubmit = (form, url, method) => {
+            const dataForm = new FormData(form[0]);
 
-        // Fungsi untuk mendapatkan semua data material
-        const getAllMaterial = (filter) => {
-            const queryParam = filter ? `?material=${filter}` : ''
-
-            resetDataTable('.table')
-            $.get(`/api/material${queryParam}`, (result, status) => {
-                const datas = result.data
-
-                let htmlContent = ''
-                let totalHarga = 0
-                let potentialProfitThisYear = 0
-                let potentialProfitNextYear = 0
-
-                datas.forEach(data => {
-                    let year = new Date(data.due_date).getFullYear()
-                    let price = parseFloat(data.price)
-
-                    htmlContent += displayTbody(data);
-                    totalHarga += price
-                    if (currentYear === year) potentialProfitThisYear += price
-                    if (nextYear === year) potentialProfitNextYear += price
-                });
-
-                if (datas.length === 0) htmlContent +=
-                    '<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>'
-
-                tbody.html(htmlContent);
-                if (datas.length > 0) {
-                    loadDataTable('.table')
-                    tfootTotalHargaText.html(rupiah(totalHarga))
-                    tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear))
-                    tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear))
+            $.ajax({
+                url: url,
+                type: method,
+                data: dataForm,
+                processData: false,
+                contentType: false,
+                beforeSend: () => setButtonDisabled($('.btn-submit'), true),
+                complete: () => setButtonDisabled($('.btn-submit'), false),
+                success: (results, status) => {
+                    getAllMaterial()
+                    toastFlashMessage(results.message, status)
+                    form[0].reset()
+                    $('.modal').modal('hide')
+                },
+                error: (xhr, status, error) => {
+                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
+                            .errors) :
+                        'Terjadi kesalahan saat memuat data.';
+                    flashMessage("Error", errorMessage, status);
                 }
-            }, 'json');
-        };
-
-        // Fungsi untuk membangun HTML untuk menampilkan data material
-        const displayTbody = (data) => {
-            const {
-                id,
-                item,
-                price,
-                billing_cycle,
-                due_date,
-                material
-            } = data;
-
-            return `<tr data-id="${id}">
-                <td>${item}</td>
-                <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
-                <td>${due_date}</td>
-                <td>${material}</td>
-                <td>
-                    <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
-                    <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
-                    <button class="btn-hapus btn btn-sm btn-danger btn-action">Hapus</button>
-                </td>
-            </tr>`;
-        };
+            });
+        }
     </script>
 @endpush

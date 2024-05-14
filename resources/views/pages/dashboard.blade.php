@@ -215,7 +215,7 @@
         const getAllPayment = () => {
             $.get('/api/payment', (results, status) => {
                 const datas = results.data
-                console.log(datas);
+                // console.log(datas);
             })
         }
 

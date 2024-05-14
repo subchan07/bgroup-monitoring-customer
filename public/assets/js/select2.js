@@ -21,4 +21,12 @@
                 });
             });
     });
+
+    $("body").on("hidden.bs.modal", ".modal", function () {
+        $(this)
+            .find(".js-example-basic-single")
+            .each(function () {
+                $(this).select2("destroy"); // Destroy the Select2 instance
+            });
+    });
 })(jQuery);
