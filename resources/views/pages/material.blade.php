@@ -5,10 +5,10 @@
         <div class="col-lg-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body">
-                    <div class="row justify-content-between align-items-start">
-                        <h4 class="card-title col-6 col-lg-2">Material Tabel</h4>
+                    <div class="row justify-content-between align-items-start gap-1">
+                        <h4 class="card-title col-12 col-lg-2 col-sm-5 mb-2">Material Tabel</h4>
 
-                        <div class="col-lg-5 col-6 d-flex justify-content-end">
+                        <div class="col-lg-5 col-12 col-sm-6 d-flex justify-content-end">
                             <div class="btn-group" role="group" aria-label="Basic example">
                                 <button type="button" data-filter="all"
                                     class="filterButton btn btn-sm btn-outline-primary">All</button>
@@ -21,7 +21,7 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-5 col-12 d-flex justify-content-end">
+                        <div class="col-lg-4 col-12 d-flex justify-content-end">
                             <button class="btn btn-sm btn-primary text-white mb-0 me-0" type="button"data-bs-toggle="modal"
                                 data-bs-target="#addMaterialModal">
                                 <i class="mdi mdi-plus-box-outline"></i> Material
