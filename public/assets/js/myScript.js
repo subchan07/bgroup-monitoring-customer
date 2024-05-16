@@ -127,3 +127,24 @@ const greeting = () => {
 
     return greeting;
 };
+
+const diffInDay = (date1, date2 = "now") => {
+    let day1 = new Date(date1);
+    let day2 = date2 === "now" ? new Date() : new Date(date2);
+    let dayDiff = day1 - day2;
+
+    return Math.round(dayDiff / (1000 * 60 * 60 * 24));
+};
+
+const badgeClassReminder = (dueDate) => {
+    let classReminder = "opacity-success";
+    if (dueDate > 30 && dueDate <= 60) {
+        classReminder = "opacity-warning";
+    } else if (dueDate > 0 && dueDate <= 30) {
+        classReminder = "opacity-danger";
+    } else if (dueDate <= 0) {
+        classReminder = "danger";
+    }
+
+    return classReminder;
+};

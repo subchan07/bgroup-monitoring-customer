@@ -58,10 +58,9 @@ class CustomerController extends Controller
      */
     public function show(Request $request, int $customer): CustomerResource
     {
-        $withDomain = $request->query('withDomain') ?? false;
-        $withSsl = $request->query('withSsl') ?? false;
+        $withMaterial= $request->query('withMaterial') ?? false;
 
-        $result = $this->__checkIdExists($customer, $withDomain, $withSsl);
+        $result = $this->__checkIdExists($customer, $withMaterial);
         return new CustomerResource($result);
     }
 
@@ -154,12 +153,13 @@ class CustomerController extends Controller
         ]);
     }
 
-    private function __checkIdExists(int $id, bool $domain = false, bool $ssl = false)
+    private function __checkIdExists(int $id, bool $withMaterial = false)
     {
         $customer = Customer::where('id', $id);
 
-        if ($domain) $customer->with('domainMaterial');
-        if ($ssl) $customer->with('sslMaterial');
+        if($withMaterial){
+            $customer->with(['domainMaterial', 'sslMaterial', 'hostingMaterial']);
+        }
 
         $customer = $customer->first();
         if (!$customer) {

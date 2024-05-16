@@ -19,14 +19,14 @@
                         </button>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-hover" id="datatable">
                             <thead>
                                 <tr>
                                     <th>Item</th>
                                     <th>Domain</th>
-                                    <th>Domain Material</th>
-                                    <th>Hosting Material</th>
-                                    <th>SSL Material</th>
+                                    <th>Domain M</th>
+                                    <th>Hosting M</th>
+                                    <th>SSL M</th>
                                     <th>Batas Waktu</th>
                                     <th>Harga</th>
                                     <th>Aksi</th>
@@ -237,11 +237,23 @@
         </form>
     </x-modal>
 
+    {{-- Detail  --}}
+    <x-modal title="Detail Customer" idModal="detailCustomerModal">
+        <div class="modal-body">
+            <table class="table table-sm">
+                <tbody id="tbodyDetailModal">
+                </tbody>
+            </table>
+        </div>
+    </x-modal>
+
     {{-- custom js for this page --}}
     <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
 
     <script>
+        const minusIcon = '<i class="mdi mdi-minus text-danger"></i>'
+        const checkIcon = '<i class="mdi mdi-check text-success"></i>'
         const tbody = $('#tbodyCustomer')
         const addForm = $('#addForm')
         const updateForm = $('#updateForm')
@@ -296,6 +308,11 @@
                 const idEl = $(event.target).closest('tr').data('id');
                 handleBayarButtonClick(idEl);
             });
+
+            tbody.on('click', '.btn-detail', (event) => {
+                const idEl = $(event.target).closest('tr').data('id')
+                handleDetailButtonCLick(idEl)
+            })
         });
 
         // Fungsi untuk mendapatkan semua data material
@@ -347,7 +364,7 @@
                     tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear));
                     tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear));
 
-                    loadDataTable('.table');
+                    loadDataTable('#datatable');
                 }
 
                 getAllMaterial();
@@ -366,16 +383,18 @@
                 hostingMaterial,
                 sslMaterial,
             } = data;
+            const reminderDueDate = diffInDay(due_date)
 
             return `<tr data-id="${id}">
                         <td>${name}</td>
                         <td>${domain}</td>
-                        <td>${domainMaterial === null ? '-' : domainMaterial.item}</td>
-                        <td>${hostingMaterial === null ? '-' : hostingMaterial.item}</td>
-                        <td>${sslMaterial === null ? '-' : sslMaterial.item}</td>
-                        <td>${due_date}</td>
+                        <td class="text-center">${domainMaterial === null ? minusIcon : checkIcon}</td>
+                        <td class="text-center">${hostingMaterial === null ? minusIcon : checkIcon}</td>
+                        <td class="text-center">${sslMaterial === null ? minusIcon : checkIcon}</td>
+                        <td><span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span> ${due_date}</td>
                         <td>${rupiah(price)}</td>
                         <td>
+                            <button class="btn-detail btn btn-sm btn-success btn-action">Detail</button>
                             <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
                             <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
                             <button class="btn-hapus btn btn-sm btn-danger btn-action">Hapus</button>
@@ -388,7 +407,7 @@
         // Fungsi untuk menangani klik tombol edit
         const handleEditButtonClick = (idEl) => {
             $.ajax({
-                url: `/api/customer/${idEl}?withDomain=true&withSsl=true`,
+                url: `/api/customer/${idEl}?withMaterial=true`,
                 type: "GET",
                 beforeSend: () => setButtonDisabled($('.btn-action'), true),
                 complete: () => setButtonDisabled($('.btn-action'), false),
@@ -415,10 +434,10 @@
                     // tambahkan select option edit
                     if (domainMaterial) selectDomainEdit.append(
                         `<option class="old-material" value="${domainMaterial.id}">${domainMaterial.item}</option>`
-                        )
+                    )
                     if (sslMaterial) selectSslEdit.append(
                         `<option class="old-material" value="${sslMaterial.id}">${sslMaterial.item}</option>`
-                        )
+                    )
 
                     $('#inputIdEdit').val(id);
                     $('#inputNameEdit').val(name);
@@ -513,6 +532,47 @@
                 }
             });
         };
+
+        // fungsi untuk detail data
+        const handleDetailButtonCLick = (idEl) => {
+            $.ajax({
+                url: `/api/customer/${idEl}?withMaterial=true`,
+                type: "GET",
+                cache: false,
+                beforeSend: () => setButtonDisabled($('.btn-action'), true),
+                complete: () => setButtonDisabled($('.btn-action'), false),
+                success: (result, status) => {
+                    const {
+                        sslMaterial,
+                        domainMaterial,
+                        hostingMaterial
+                    } = result.data
+
+                    $('#tbodyDetailModal').html(
+                        `${displayDetailCustomer('Domain', domainMaterial)} ${displayDetailCustomer('Hosting', hostingMaterial)} ${displayDetailCustomer('SSL', sslMaterial)}`
+                        )
+                    $('#detailCustomerModal').modal('show')
+                },
+                error: (xhr, status, error) => {
+                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON.errors) :
+                        'Terjadi kesalahan saat memuat data.'
+                    flashMessage('Error', errorMessage, status)
+                }
+            })
+        }
+
+        const displayDetailCustomer = (title, object) => {
+            if (object) {
+                return `<tr>
+                            <td><span class="fw-bold">${title}</span></td>
+                            <td><span class="fw-bold">Item:</span> ${object.item}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><span class="fw-bold">Harga:</span> ${rupiah(object.price)}</td>
+                        </tr><tr><td colspan="2" class="border-0">&nbsp;</td></tr>`
+            }
+        }
 
         // fungsi untuk form submit
         const handleFormSubmit = (form, url, method) => {

@@ -33,9 +33,9 @@
                             <thead>
                                 <tr>
                                     <th>Item</th>
-                                    <th>Harga</th>
-                                    <th>Batas Waktu</th>
                                     <th>Material</th>
+                                    <th>Batas Waktu</th>
+                                    <th>Harga</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
@@ -351,12 +351,13 @@
                 due_date,
                 material
             } = data;
+            const reminderDueDate = diffInDay(due_date)
 
             return `<tr data-id="${id}">
                 <td>${item}</td>
-                <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
-                <td>${due_date}</td>
                 <td>${material}</td>
+                <td><span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span> ${due_date}</td>
+                <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
                 <td>
                     <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
                     <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
