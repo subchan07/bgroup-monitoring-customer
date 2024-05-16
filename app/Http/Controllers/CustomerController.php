@@ -74,6 +74,8 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'domain' => 'required|string',
+            'due_date' => 'required|date',
+            'price' => 'required|decimal:0,2',
             'domain_material_id' => 'nullable|exists:materials,id,material,domain',
             'hosting_material_id' => 'nullable|exists:materials,id,material,hosting',
             'ssl_material_id' => 'nullable|exists:materials,id,material,ssl',

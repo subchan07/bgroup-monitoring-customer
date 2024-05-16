@@ -22,12 +22,12 @@
                         <table class="table table-hover" id="datatable">
                             <thead>
                                 <tr>
-                                    <th>Item</th>
+                                    <th>Batas Waktu</th>
+                                    <th>Customer</th>
                                     <th>Domain</th>
                                     <th>Domain M</th>
                                     <th>Hosting M</th>
                                     <th>SSL M</th>
-                                    <th>Batas Waktu</th>
                                     <th>Harga</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -75,7 +75,8 @@
             @csrf
             <div class="modal-body">
                 <div class="form-group row">
-                    <label for="inputName" class="col-sm-3 col-form-label">Item <span class="text-danger">*</span></label>
+                    <label for="inputName" class="col-sm-3 col-form-label">Customer <span
+                            class="text-danger">*</span></label>
                     <div class="col-sm-9">
                         <input type="text" name="name" id="inputName" class="form-control" required />
                     </div>
@@ -140,7 +141,7 @@
             <div class="modal-body">
                 <input type="hidden" id="inputIdEdit">
                 <div class="form-group row">
-                    <label for="inputNameEdit" class="col-sm-3 col-form-label">Item <span
+                    <label for="inputNameEdit" class="col-sm-3 col-form-label">Customer <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
                         <input type="text" name="name" id="inputNameEdit" class="form-control" required />
@@ -151,6 +152,19 @@
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
                         <input type="text" name="domain" id="inputDomainEdit" class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputDueDateEdit" class="col-sm-3 col-form-label">Batas Waktu <span
+                            class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        <input type="date" name="due_date" id="inputDueDateEdit" class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputPriceEdit" class="col-sm-3 col-form-label">Harga <span class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        <input type="number" name="price" id="inputPriceEdit" step="0.01" class="form-control" required />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -192,7 +206,7 @@
             <div class="modal-body">
                 <input type="hidden" name="customer_id" id="inputIdPayment">
                 <div class="form-group row">
-                    <label for="inputCustomerNamePayment" class="col-sm-3 col-form-label">Item</label>
+                    <label for="inputCustomerNamePayment" class="col-sm-3 col-form-label">Customer</label>
                     <div class="col-sm-9">
                         <input type="text" id="inputCustomerNamePayment" class="form-control" readonly />
                     </div>
@@ -386,12 +400,12 @@
             const reminderDueDate = diffInDay(due_date)
 
             return `<tr data-id="${id}">
+                        <td>${due_date} <span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span></td>
                         <td>${name}</td>
                         <td>${domain}</td>
                         <td class="text-center">${domainMaterial === null ? minusIcon : checkIcon}</td>
                         <td class="text-center">${hostingMaterial === null ? minusIcon : checkIcon}</td>
                         <td class="text-center">${sslMaterial === null ? minusIcon : checkIcon}</td>
-                        <td><span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span> ${due_date}</td>
                         <td>${rupiah(price)}</td>
                         <td>
                             <button class="btn-detail btn btn-sm btn-success btn-action">Detail</button>
@@ -550,7 +564,7 @@
 
                     $('#tbodyDetailModal').html(
                         `${displayDetailCustomer('Domain', domainMaterial)} ${displayDetailCustomer('Hosting', hostingMaterial)} ${displayDetailCustomer('SSL', sslMaterial)}`
-                        )
+                    )
                     $('#detailCustomerModal').modal('show')
                 },
                 error: (xhr, status, error) => {

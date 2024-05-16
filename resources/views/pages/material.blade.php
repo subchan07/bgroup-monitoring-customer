@@ -32,9 +32,9 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
+                                    <th>Batas Waktu</th>
                                     <th>Item</th>
                                     <th>Material</th>
-                                    <th>Batas Waktu</th>
                                     <th>Harga</th>
                                     <th>Aksi</th>
                                 </tr>
@@ -354,9 +354,9 @@
             const reminderDueDate = diffInDay(due_date)
 
             return `<tr data-id="${id}">
+                <td>${due_date} <span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span></td>
                 <td>${item}</td>
                 <td>${material}</td>
-                <td><span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span> ${due_date}</td>
                 <td>${rupiah(price)} <small class="d-block text-muted">${billing_cycle}</small></td>
                 <td>
                     <button class="btn-bayar btn btn-sm btn-info btn-action">Bayar</button>
