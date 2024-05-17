@@ -353,7 +353,7 @@
 
         // Fungsi untuk mendapatkan semua data customer
         const getAllCustomer = () => {
-            resetDataTable('.table');
+            resetDataTable('#datatable');
             $.get('/api/customer', (result, status) => {
                 const results = result.data;
                 let totalHarga = 0,
