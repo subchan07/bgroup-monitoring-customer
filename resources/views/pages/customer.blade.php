@@ -469,12 +469,6 @@
                     selectSslEdit.val(ssl_material_id);
 
                     $('#editCustomerModal').modal('show')
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             })
         }
@@ -505,12 +499,6 @@
 
                     // Tampilkan modal edit
                     $('#bayarCustomerModal').modal('show');
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             })
         };
@@ -544,11 +532,6 @@
                 success: (response, status) => {
                     getAllCustomer()
                     toastFlashMessage(response.message, status);
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON.errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             });
         };
@@ -576,11 +559,6 @@
 
                     $('#tbodyDetailModal').html(html)
                     $('#detailCustomerModal').modal('show')
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON.errors) :
-                        'Terjadi kesalahan saat memuat data.'
-                    flashMessage('Error', errorMessage, status)
                 }
             })
         }
@@ -615,12 +593,6 @@
                     toastFlashMessage(results.message, status)
                     form[0].reset()
                     $('.modal').modal('hide')
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             });
         }

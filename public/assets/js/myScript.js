@@ -13,12 +13,6 @@ $(() => {
                 toastFlashMessage(results.message, status);
                 location.href = "/";
             },
-            error: (xhr, status, error) => {
-                const errorMessage = xhr.responseJSON
-                    ? displayError(xhr.responseJSON.errors)
-                    : "Terjadi kesalahan saat memuat data.";
-                flashMessage("Error", errorMessage, status);
-            },
         });
     });
 
@@ -29,11 +23,16 @@ $(() => {
             Authorization: `Bearer ${localStorage.getItem("token-name")}`,
         },
         error: function (x, e) {
+            if (x.status == 400) {
+                const errorMessage = x.responseJSON
+                    ? displayError(x.responseJSON.errors)
+                    : "Terjadi kesalahan saat memuat data.";
+                flashMessage("Error", errorMessage, e);
+            }
+
+            flashMessage("Error", x.responseJSON.message, "error");
             if (x.status == 401) {
-                flashMessage("Error", x.responseJSON.message, "error");
-                setTimeout(() => {
-                    location.href = "/login";
-                }, 1500);
+                location.href = "/login";
             }
         },
     });

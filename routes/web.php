@@ -17,10 +17,12 @@ Route::get('/', function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('login', 'loginView')->name('login')->middleware('guest');
-    Route::get('/register', 'registerView')->name('register')->middleware('guest');
+    // Route::get('/register', 'registerView')->name('register')->middleware('guest');
 
     Route::post('login', 'login');
     Route::post('logout', 'logout')->name('logout');
+
+    Route::get('user/profile', 'profileView')->middleware('auth');
 });
 
 Route::middleware('auth')->group(function () {

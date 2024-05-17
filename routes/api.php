@@ -13,6 +13,9 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/current', [AuthController::class, 'current']);
+    Route::post('/user/profile', [AuthController::class, 'editProfile']);
+
     Route::get('/material/summaryByMonth', [MaterialController::class, 'summaryByMonth']);
 
     Route::post('/material/bayar', [MaterialController::class, 'bayar']);

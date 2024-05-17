@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -22,38 +23,13 @@ class AuthController extends Controller
         return view('pages.auth.register');
     }
 
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:8'
-        ]);
-
-        if ($validator->fails()) {
-            throw new HttpResponseException(response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 400));
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User baru berhasil ditambahkan.'
-        ]);
-    }
-
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
+        $request->validate(['password' => 'required|string']);
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
-            $user = User::where('email', $request->email)->first();
+        $user = User::where('email', 'admin@bgroup.id')->first();
+        if ($user && Hash::check($request->input('password'), $user->password)) {
+            Auth::login($user);
             $token = $user->createToken('token-name')->plainTextToken;
             $request->session()->regenerate();
 
@@ -83,5 +59,44 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'logout success'
         ]);
+    }
+
+
+    // Edit Profile
+    public function profileView()
+    {
+        return view('pages.profile');
+    }
+
+    public function editProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'password' => 'nullable|min:8'
+        ]);
+
+        if ($validator->fails()) {
+            throw new HttpResponseException(response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 400));
+        }
+
+        $user = $request->user();
+        $user->update($request->except('password'));
+
+        if ($request->filled('password')) {
+            $user->update(['password' => bcrypt($request->input('password'))]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Edit profile berhasil diubah.'
+        ]);
+    }
+
+    public function current(Request $request): JsonResponse
+    {
+        return response()->json(['data' => $request->user(), 'success' => true]);
     }
 }

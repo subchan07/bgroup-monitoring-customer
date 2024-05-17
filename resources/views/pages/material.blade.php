@@ -412,12 +412,6 @@
 
                     // Tampilkan modal edit
                     $('#editMaterialModal').modal('show');
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             })
         }
@@ -448,12 +442,6 @@
 
                     // Tampilkan modal edit
                     $('#bayarMaterialModal').modal('show');
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             })
         };
@@ -487,11 +475,6 @@
                 success: (response, status) => {
                     getAllMaterial()
                     toastFlashMessage(response.message, status);
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON.errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             });
         };
@@ -513,12 +496,6 @@
                     toastFlashMessage(results.message, status)
                     form[0].reset()
                     $('.modal').modal('hide')
-                },
-                error: (xhr, status, error) => {
-                    const errorMessage = xhr.responseJSON ? displayError(xhr.responseJSON
-                            .errors) :
-                        'Terjadi kesalahan saat memuat data.';
-                    flashMessage("Error", errorMessage, status);
                 }
             });
         }
