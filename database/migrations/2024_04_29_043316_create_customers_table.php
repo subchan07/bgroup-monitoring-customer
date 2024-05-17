@@ -14,10 +14,9 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('domain')->comment('nama domain');
+            $table->string('domain');
             $table->date('due_date');
             $table->decimal('price', 12);
-            $table->foreignId('domain_material_id')->nullable()->constrained('materials')->cascadeOnDelete();
             $table->foreignId('hosting_material_id')->nullable()->constrained('materials')->cascadeOnDelete();
             $table->foreignId('ssl_material_id')->nullable()->constrained('materials')->cascadeOnDelete();
 

@@ -2,20 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Customer;
+use App\Models\CustomerMaterial;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Material extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['item', 'price', 'billing_cycle',  'due_date', 'material'];
+    protected $fillable = ['item', 'price', 'billing_cycle',  'due_date', 'material', 'is_multiple'];
 
 
-    public function domainCustomer(): HasMany
+    public function customers(): BelongsToMany
     {
-        return $this->hasMany(Customer::class, 'domain_material_id');
+        return $this->belongsToMany(Customer::class, 'customer_domains', 'material_id', 'customer_id');
     }
 
     public function hostingCustomer(): HasMany

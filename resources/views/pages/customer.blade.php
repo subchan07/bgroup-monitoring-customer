@@ -104,7 +104,7 @@
                 <div class="form-group row">
                     <label for="inputDomainMaterial" class="col-sm-3 col-form-label">Domain</label>
                     <div class="col-sm-9">
-                        <select name="domain_material_id" id="inputDomainMaterial"
+                        <select name="domain_material_ids[]" id="inputDomainMaterial" multiple
                             class="select-domain js-example-basic-single w-100">
                         </select>
                     </div>
@@ -162,15 +162,17 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputPriceEdit" class="col-sm-3 col-form-label">Harga <span class="text-danger">*</span></label>
+                    <label for="inputPriceEdit" class="col-sm-3 col-form-label">Harga <span
+                            class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="number" name="price" id="inputPriceEdit" step="0.01" class="form-control" required />
+                        <input type="number" name="price" id="inputPriceEdit" step="0.01" class="form-control"
+                            required />
                     </div>
                 </div>
                 <div class="form-group row">
                     <label for="inputDomainMaterialEdit" class="col-sm-3 col-form-label">Domain </label>
                     <div class="col-sm-9">
-                        <select name="domain_material_id" id="inputDomainMaterialEdit"
+                        <select name="domain_material_ids[]" id="inputDomainMaterialEdit" multiple
                             class="select-domain js-example-basic-single w-100">
                         </select>
                     </div>
@@ -334,9 +336,9 @@
             $.get('/api/material?unused_by_customers=true', (result, status) => {
                 const results = result.data;
 
-                selectDomain.html('<option selected value="">-- Pilih --</option>')
-                selectHosting.html('<option selected value="">-- Pilih --</option>')
-                selectSsl.html('<option selected value="">-- Pilih --</option>')
+                selectDomain.html('<option disabled value="">-- Pilih --</option>')
+                selectHosting.html('<option selected disabled value="">-- Pilih --</option>')
+                selectSsl.html('<option selected disabled value="">-- Pilih --</option>')
 
                 results.forEach(data => {
                     if (data.material === 'hosting')
@@ -393,7 +395,7 @@
                 domain,
                 due_date,
                 price,
-                domainMaterial,
+                domainMaterials,
                 hostingMaterial,
                 sslMaterial,
             } = data;
@@ -403,7 +405,7 @@
                         <td>${due_date} <span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span></td>
                         <td>${name}</td>
                         <td>${domain}</td>
-                        <td class="text-center">${domainMaterial === null ? minusIcon : checkIcon}</td>
+                        <td class="text-center">${domainMaterials && domainMaterials.length === 0 ? minusIcon : checkIcon}</td>
                         <td class="text-center">${hostingMaterial === null ? minusIcon : checkIcon}</td>
                         <td class="text-center">${sslMaterial === null ? minusIcon : checkIcon}</td>
                         <td>${rupiah(price)}</td>
@@ -435,20 +437,23 @@
                         domain,
                         due_date,
                         price,
-                        domain_material_id,
+                        domain_material_ids,
                         hosting_material_id,
                         ssl_material_id,
                         sslMaterial,
-                        domainMaterial
+                        domainMaterials
                     } = result.data
 
                     // hapus elemen select option old-material
                     $('.old-material').remove()
 
                     // tambahkan select option edit
-                    if (domainMaterial) selectDomainEdit.append(
-                        `<option class="old-material" value="${domainMaterial.id}">${domainMaterial.item}</option>`
-                    )
+                    if (domainMaterials && domainMaterials.length >= 0) {
+                        domainMaterials.forEach((data, index) => selectDomainEdit.append(
+                            `<option class="old-material" value="${data.id}">${data.item}</option>`
+                        ))
+                    }
+
                     if (sslMaterial) selectSslEdit.append(
                         `<option class="old-material" value="${sslMaterial.id}">${sslMaterial.item}</option>`
                     )
@@ -459,7 +464,7 @@
                     $('#inputDueDateEdit').val(due_date);
                     $('#inputPriceEdit').val(price);
                     $('#inputHostingMaterialEdit').val(hosting_material_id);
-                    selectDomainEdit.val(domain_material_id);
+                    selectDomainEdit.val(domain_material_ids)
                     selectSslEdit.val(ssl_material_id);
 
                     $('#editCustomerModal').modal('show')
@@ -558,13 +563,16 @@
                 success: (result, status) => {
                     const {
                         sslMaterial,
-                        domainMaterial,
+                        domainMaterials,
                         hostingMaterial
                     } = result.data
 
-                    $('#tbodyDetailModal').html(
-                        `${displayDetailCustomer('Domain', domainMaterial)} ${displayDetailCustomer('Hosting', hostingMaterial)} ${displayDetailCustomer('SSL', sslMaterial)}`
-                    )
+                    let html = ''
+                    domainMaterials.forEach((data, i) => html += displayDetailCustomer(`Domain ${i+1}`, data))
+                    html += displayDetailCustomer('Hosting', hostingMaterial)
+                    html += displayDetailCustomer('SSL', sslMaterial)
+
+                    $('#tbodyDetailModal').html(html)
                     $('#detailCustomerModal').modal('show')
                 },
                 error: (xhr, status, error) => {

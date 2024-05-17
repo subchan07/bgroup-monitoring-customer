@@ -16,9 +16,10 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): CustomerCollection
+    public function index()
     {
-        $customers = Customer::with(['domainMaterial', 'hostingMaterial', 'sslMaterial'])->orderBy('due_date')->get();
+        $customers = Customer::with(['domainMaterials', 'hostingMaterial', 'sslMaterial'])->orderBy('due_date')->get();
+        // return response()->json($customers);
         return new CustomerCollection($customers);
     }
 
@@ -27,12 +28,14 @@ class CustomerController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'domain' => 'required|string',
             'due_date' => 'required|date',
             'price' => 'required|decimal:0,2',
-            'domain_material_id' => 'nullable|exists:materials,id,material,domain',
+            'domain_material_ids' => 'nullable|array',
+            'domain_material_ids.*' => 'exists:materials,id,material,domain',
             'hosting_material_id' => 'nullable|exists:materials,id,material,hosting',
             'ssl_material_id' => 'nullable|exists:materials,id,material,ssl',
         ]);
@@ -44,8 +47,11 @@ class CustomerController extends Controller
             ], 400));
         }
 
-        $validated = $validator->validated();
-        Customer::create($validated);
+        $validated = $request->except(['domain_material_ids']);
+        $customer = Customer::create($validated);
+
+        $domainIds = $request->input('domain_material_ids');
+        $customer->domainMaterials()->attach($domainIds);
 
         return response()->json([
             'success' => true,
@@ -58,7 +64,7 @@ class CustomerController extends Controller
      */
     public function show(Request $request, int $customer): CustomerResource
     {
-        $withMaterial= $request->query('withMaterial') ?? false;
+        $withMaterial = $request->query('withMaterial') ?? false;
 
         $result = $this->__checkIdExists($customer, $withMaterial);
         return new CustomerResource($result);
@@ -76,7 +82,8 @@ class CustomerController extends Controller
             'domain' => 'required|string',
             'due_date' => 'required|date',
             'price' => 'required|decimal:0,2',
-            'domain_material_id' => 'nullable|exists:materials,id,material,domain',
+            'domain_material_ids' => 'nullable|array',
+            'domain_material_ids.*' => 'exists:materials,id,material,domain',
             'hosting_material_id' => 'nullable|exists:materials,id,material,hosting',
             'ssl_material_id' => 'nullable|exists:materials,id,material,ssl',
         ]);
@@ -88,8 +95,11 @@ class CustomerController extends Controller
             ], 400));
         }
 
-        $validated = $validator->validated();
+        $validated = $request->except('domain_material_ids');
         $customer->update($validated);
+
+        $domainIds = $request->input('domain_material_ids');
+        $customer->domainMaterials()->sync($domainIds);
 
         return response()->json([
             'success' => true,
@@ -103,6 +113,7 @@ class CustomerController extends Controller
     public function destroy(int $customer): JsonResponse
     {
         $customer = $this->__checkIdExists($customer);
+        $customer->domainMaterials()->detach();
         $customer->delete();
 
         return response()->json([
@@ -159,8 +170,8 @@ class CustomerController extends Controller
     {
         $customer = Customer::where('id', $id);
 
-        if($withMaterial){
-            $customer->with(['domainMaterial', 'sslMaterial', 'hostingMaterial']);
+        if ($withMaterial) {
+            $customer->with(['domainMaterials', 'sslMaterial', 'hostingMaterial']);
         }
 
         $customer = $customer->first();

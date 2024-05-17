@@ -106,7 +106,7 @@ const resetDataTable = (param) => {
 
 const loadDataTable = (param) => {
     $(param).DataTable({
-        pageLength: 10,
+        pageLength: 50,
         order: [],
     });
 };

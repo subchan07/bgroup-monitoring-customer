@@ -31,11 +31,16 @@ class MaterialController extends Controller
         }
 
         if ($unusedByCustomers) {
-            $materials->whereNotExists(function ($query) {
-                $query->select(DB::raw(1))
-                    ->from('customers')
-                    ->whereRaw('customers.ssl_material_id = materials.id')
-                    ->orWhereRaw('customers.domain_material_id = materials.id');
+            $materials->where(function ($query) {
+                $query->whereNotExists(function ($subQuery) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('customer_domains')
+                        ->whereRaw('customer_domains.material_id = materials.id');
+                })->whereNotExists(function ($subQuery) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('customers')
+                        ->whereRaw('customers.ssl_material_id = materials.id');
+                })->orWhere('item', 'laporanusaha.com');
             });
         }
 
