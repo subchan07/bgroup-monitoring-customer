@@ -40,7 +40,7 @@ class MaterialController extends Controller
                     $subQuery->select(DB::raw(1))
                         ->from('customers')
                         ->whereRaw('customers.ssl_material_id = materials.id');
-                })->orWhere('item', 'laporanusaha.com');
+                })->orWhere('is_multiple', true);
             });
         }
 
@@ -70,6 +70,7 @@ class MaterialController extends Controller
         }
 
         $validated = $validator->validated();
+        $validated['is_multiple']  = $request->input('material') == 'domain' && $request->input('is_multiple') ?? false;
         Material::create($validated);
 
         return response()->json([
@@ -110,6 +111,7 @@ class MaterialController extends Controller
         }
 
         $validated = $validator->validated();
+        $validated['is_multiple']  = $request->input('material') == 'domain' && $request->input('is_multiple') ?? false;
         $material->update($validated);
 
         return response()->json([

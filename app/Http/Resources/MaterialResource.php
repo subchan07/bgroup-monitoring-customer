@@ -21,6 +21,7 @@ class MaterialResource extends JsonResource
             'billing_cycle' => $this->billing_cycle,
             'due_date' => $this->due_date,
             'material' => $this->material,
+            'is_multiple' => $this->is_multiple,
         ];
     }
 }

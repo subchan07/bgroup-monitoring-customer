@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('billing_cycle');
             $table->date('due_date');
             $table->enum('material', ['domain', 'hosting', 'ssl']);
+            $table->boolean('is_multiple')->default(false);
 
             $table->timestamps();
         });

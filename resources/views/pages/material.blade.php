@@ -108,17 +108,24 @@
                         <input type="date" name="due_date" id="inputDueDate" class="form-control" required />
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row mb-2">
                     <label for="inputMaterial" class="col-sm-3 col-form-label">Material <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <select name="material" id="inputMaterial" class="form-select text-dark" required>
+                        <select name="material" id="inputMaterial" class="form-select text-dark"
+                            onchange="ifTrueDisabled(this, '#inputMultiple', 'domain')" required>
                             <option selected value="">-- Pilih --</option>
                             <option value="hosting">Hosting</option>
                             <option value="domain">Domain</option>
                             <option value="ssl">SSL</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-check-label">
+                        <input type="checkbox" name="is_multiple" id="inputMultiple" class="form-check-input"
+                            value="yes" disabled> Tidak sekali pilih<i class="input-helper"></i>
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">
@@ -166,17 +173,24 @@
                             required />
                     </div>
                 </div>
-                <div class="form-group row">
+                <div class="form-group row mb-0">
                     <label for="inputMaterialEdit" class="col-sm-3 col-form-label">Material <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <select name="material" id="inputMaterialEdit" class="form-select text-dark" required>
+                        <select name="material" id="inputMaterialEdit" class="form-select text-dark"
+                            onchange="ifTrueDisabled(this, '#inputMultipleEdit', 'domain')" required>
                             <option selected value="">-- Pilih --</option>
                             <option value="hosting">Hosting</option>
                             <option value="domain">Domain</option>
                             <option value="ssl">SSL</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-check-label">
+                        <input type="checkbox" name="is_multiple" id="inputMultipleEdit" class="form-check-input"
+                            value="yes" disabled> Tidak sekali pilih<i class="input-helper"></i>
+                    </label>
                 </div>
             </div>
             <div class="modal-footer">
@@ -382,7 +396,8 @@
                         price,
                         billing_cycle,
                         due_date,
-                        material
+                        material,
+                        is_multiple
                     } = result.data
 
                     // Isi nilai form dengan data material yang akan diupdate
@@ -392,6 +407,8 @@
                     $('#inputDueDatePaymentEdit').val(due_date);
                     $('#inputBillingCycleEdit').val(billing_cycle);
                     $('#inputMaterialEdit').val(material);
+                    $('#inputMultipleEdit').prop('checked', is_multiple)
+                        .prop('disabled', material !== 'domain' ?? false);
 
                     // Tampilkan modal edit
                     $('#editMaterialModal').modal('show');

@@ -148,3 +148,8 @@ const badgeClassReminder = (dueDate) => {
 
     return classReminder;
 };
+
+function ifTrueDisabled(input, target, value) {
+    const currentVal = $(input).val();
+    $(target).prop("disabled", currentVal != value);
+}

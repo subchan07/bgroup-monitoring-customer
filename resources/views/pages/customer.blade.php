@@ -449,9 +449,10 @@
 
                     // tambahkan select option edit
                     if (domainMaterials && domainMaterials.length >= 0) {
-                        domainMaterials.forEach((data, index) => selectDomainEdit.append(
-                            `<option class="old-material" value="${data.id}">${data.item}</option>`
-                        ))
+                        domainMaterials.forEach((data, index) => {
+                            if (!data.is_multiple) selectDomainEdit.append(`<option class="old-material" value="${data.id}">${data.item}</option>`)
+
+                        })
                     }
 
                     if (sslMaterial) selectSslEdit.append(
@@ -568,7 +569,8 @@
                     } = result.data
 
                     let html = ''
-                    domainMaterials.forEach((data, i) => html += displayDetailCustomer(`Domain ${i+1}`, data))
+                    domainMaterials.forEach((data, i) => html += displayDetailCustomer(`Domain ${i+1}`,
+                        data))
                     html += displayDetailCustomer('Hosting', hostingMaterial)
                     html += displayDetailCustomer('SSL', sslMaterial)
 
