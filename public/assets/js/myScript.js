@@ -1,5 +1,26 @@
 $(() => {
     // $('#greeting').html(greeting())
+    const logoutForm = $(".logoutForm");
+
+    logoutForm.submit((event) => {
+        event.preventDefault();
+        $.ajax({
+            url: "/logout",
+            type: "POST",
+            processData: false,
+            contentType: false,
+            success: (results, status) => {
+                toastFlashMessage(results.message, status);
+                location.href = "/";
+            },
+            error: (xhr, status, error) => {
+                const errorMessage = xhr.responseJSON
+                    ? displayError(xhr.responseJSON.errors)
+                    : "Terjadi kesalahan saat memuat data.";
+                flashMessage("Error", errorMessage, status);
+            },
+        });
+    });
 
     $.ajaxSetup({
         headers: {
