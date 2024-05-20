@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\CustomerResource;
-use App\Http\Resources\PaymentCollection;
-use App\Http\Resources\PaymentResource;
+use Carbon\Carbon;
 use App\Models\Payment;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Models\Customer;
+use App\Models\Material;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Resources\PaymentResource;
+use App\Http\Resources\PaymentCollection;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class PaymentController extends Controller
 {
@@ -23,10 +26,10 @@ class PaymentController extends Controller
             $query->with(['domainMaterial', 'hostingMaterial', 'sslMaterial']);
         }]);
 
-        if ($limit) $payments = $payments->limit($limit);
-        if ($year) $payments = $payments->whereYear('date', $year);
+        if ($limit) $payments->limit($limit);
+        if ($year) $payments->whereYear('date', $year);
 
-        $payments= $payments->orderBy('date')->get();
+        $payments = $payments->orderBy('date')->get();
 
         return new PaymentCollection($payments);
     }
@@ -60,5 +63,64 @@ class PaymentController extends Controller
         }
 
         return $payment;
+    }
+
+    public function getAnnualPaymentSummary(Request $request): JsonResponse
+    {
+        $currentYear = date('Y');
+        $year = $request->query('year') ?? $currentYear;
+
+        $years = array_unique(array_merge(
+            Material::selectRaw('YEAR(due_date) as year')->distinct()->pluck('year')->toArray(),
+            Customer::selectRaw('YEAR(due_date) as year')->distinct()->pluck('year')->toArray()
+        ));
+        sort($years);
+
+        // Ambil summary berdasarkan bulan dari database
+        $summaryMaterial = Material::selectRaw('DATE_FORMAT(due_date, "%Y-%m") as month, SUM(price) as total_price')->whereYear('due_date', $year)->groupBy('month')->pluck('total_price', 'month');
+        $summaryCustomer = Customer::selectRaw('DATE_FORMAT(due_date, "%Y-%m") as month, SUM(price) as total_price')->whereYear('due_date', $year)->groupBy('month')->pluck('total_price', 'month');
+
+        // Buat array kosong untuk menyimpan summary per bulan
+        $monthlySummary = [];
+
+        // Buat array untuk mewakili 12 bulan dari Januari sampai Desember
+        $months = Carbon::parse("$year-01-01")->startOfMonth();
+
+        for ($i = 0; $i < 12; $i++) {
+            $monthKey = $months->format('Y-m');
+
+            $material = $summaryMaterial[$monthKey] ?? 0;
+            $customer = $summaryCustomer[$monthKey] ?? 0;
+
+            $monthlySummary[$monthKey] =  $material + $customer;
+            $months->addMonth();
+        }
+
+        $sumMaterialCurrentYear = Material::whereYear('due_date', $currentYear)->sum('price');
+        $sumCustomerCurrentYear = Customer::whereYear('due_date', $currentYear)->sum('price');
+        $totalSummaryCurrentYear = $sumMaterialCurrentYear + $sumCustomerCurrentYear;
+
+        // calculate the total profit fot the current year form payments
+        $paymentsSummary = Payment::selectRaw('
+            SUM(CASE WHEN material_id IS NOT NULL THEN payment_amount ELSE 0 END) AS total_price_material,
+            SUM(CASE WHEN customer_id IS NOT NULL THEN payment_amount ELSE 0 END) AS total_price_customer,
+            SUM(payment_amount) AS total_price
+        ')->whereYear('date', $currentYear)->first();
+
+        return response()->json([
+            'data' => [
+                'years' => $years,
+                'monthly_customer_summary' => $monthlySummary,
+                'material_summary_current_year' => $sumMaterialCurrentYear,
+                'customer_summary_current_year' => $sumCustomerCurrentYear,
+                'total_summary_current_year' => $totalSummaryCurrentYear,
+                'paymentSummary' => [
+                    'total_price_material' => $paymentsSummary->total_price_material,
+                    'total_price_customer' => $paymentsSummary->total_price_customer,
+                    'total_price' => $paymentsSummary->total_price
+                ]
+            ],
+            'success' => true,
+        ]);
     }
 }

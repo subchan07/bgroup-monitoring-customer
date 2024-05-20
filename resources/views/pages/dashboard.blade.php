@@ -20,8 +20,6 @@
                     </ul>
                     <div>
                         <div class="btn-wrapper">
-                            {{-- <a href="#" class="btn btn-otline-dark align-items-center"><i class="icon-share"></i>
-                                Share</a> --}}
                             <a href="#" class="btn btn-otline-dark"><i class="icon-printer"></i> Print</a>
                             <a href="#" class="btn btn-primary text-white me-0"><i class="icon-download"></i>
                                 Export</a>
@@ -32,24 +30,26 @@
                     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="statistics-details d-flex align-items-center justify-content-between">
+                                <div class="statistics-details d-flex align-items-start justify-content-between">
                                     <div>
-                                        <p class="statistics-title">Kewajiban</p>
-                                        <h3 class="rate-percentage">0</h3>
-                                        <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>0</span>
-                                        </p>
+                                        <p class="statistics-title">Material</p>
+                                        <h3 class="rate-percentage" id="profitMaterial">0</h3>
+                                        <div class="text-muted">
+                                            <p class="mb-0" id="yearPotensiProfit">2024-2025</p>
+                                            <p class="fw-semibold mb-0" id="nilaiPotensiProfitMaterial">Rp. 0</p>
+                                        </div>
                                     </div>
                                     <div>
-                                        <p class="statistics-title">Pembayaran</p>
-                                        <h3 class="rate-percentage">0</h3>
-                                        <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>0</span>
-                                        </p>
+                                        <p class="statistics-title">User</p>
+                                        <h3 class="rate-percentage" id="profitUser">0</h3>
+                                        <div class="text-muted">
+                                            <p class="mb-0" id="yearPotensiProfit">2024-2025</p>
+                                            <p class="fw-semibold mb-0" id="nilaiPotensiProfitUser">Rp. 0</p>
+                                        </div>
                                     </div>
                                     <div>
                                         <p class="statistics-title">Profit</p>
-                                        <h3 class="rate-percentage">0</h3>
-                                        <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>0</span>
-                                        </p>
+                                        <h3 class="rate-percentage" id="profitTotal" title="(user - material)">0</h3>
                                     </div>
                                 </div>
                             </div>
@@ -130,8 +130,9 @@
                                                     <div class="wrapper w-100">
                                                         <p class="mb-0">
                                                             <a href="{{ route('customer') }}"
-                                                                class="fw-bold text-primary">Show all <i
-                                                                    class="mdi mdi-arrow-right ms-2"></i></a>
+                                                                class="fw-bold text-primary">Show all
+                                                                <i class="mdi mdi-arrow-right ms-2"></i>
+                                                            </a>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -153,6 +154,7 @@
     <script src="{{ asset('assets/vendors/progressbar.js/progressbar.min.js') }}"></script>
 
     <script>
+        const currentYear = new Date().getFullYear()
         const filterChart = $('#filterChart')
         $(() => {
             summaryByMonth()
@@ -170,48 +172,59 @@
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         const getAllCustomer = () => {
-            $.get('/api/customer', (results, status) => {
+            $.get('/api/customer?limit=5', (results, status) => {
                 const datas = results.data;
 
                 let recentEvent = ''
                 datas.forEach((data, index) => {
-                    if (index < 5) recentEvent += displayRecentEvent(data.name, data.due_date)
+                    recentEvent += displayRecentEvent(data.name, data.due_date)
                 });
                 $('#customerRecent').html(recentEvent)
             }, 'json');
         }
 
         const getAllMaterial = () => {
-            $.get('/api/material', (results, status) => {
+            $.get('/api/material?limit=5', (results, status) => {
                 const datas = results.data;
 
                 let recentEvent = ''
                 datas.forEach((data, index) => {
-                    if (index < 5) recentEvent += displayRecentEvent(data.item, data.due_date)
+                    recentEvent += displayRecentEvent(data.item, data.due_date)
                 });
                 $('#materialRecent').html(recentEvent)
             }, 'json');
         }
 
-        const getAllPayment = () => {
-            $.get('/api/payment', (results, status) => {
-                const datas = results.data
-                // console.log(datas);
-            })
-        }
-
         const summaryByMonth = (year) => {
             let queryParam = year ? `?year=${year}` : ''
 
-            $.get(`/api/material/summaryByMonth${queryParam}`, (results, status) => {
+            $.get(`/api/payment/annual-summary${queryParam}`, (results, status) => {
                 const {
-                    data,
-                    years
-                } = results
-                initChart(data)
+                    years,
+                    monthly_customer_summary,
+                    material_summary_current_year,
+                    customer_summary_current_year,
+                    total_summary_current_year,
+                } = results.data
+                const {
+                    total_price_material,
+                    total_price_customer,
+                    total_price
+                } = results.data.paymentSummary
+
+                $('#profitMaterial').html(rupiah(total_price_material))
+                $('#nilaiPotensiProfitMaterial').html(rupiah(material_summary_current_year))
+
+                $('#profitUser').html(rupiah(total_price_customer))
+                $('#nilaiPotensiProfitUser').html(rupiah(customer_summary_current_year))
+
+                $('#profitTotal').html(rupiah(total_price))
+
+                initChart(monthly_customer_summary)
 
                 filterChart.html(years.map((year) => `<option val="${year}">${year}</option>`))
                 if (year) filterChart.val(year)
+                else filterChart.val(currentYear)
             })
         }
 

@@ -16,10 +16,16 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request): CustomerCollection
     {
-        $customers = Customer::with(['domainMaterials', 'hostingMaterial', 'sslMaterial'])->orderBy('due_date')->get();
-        // return response()->json($customers);
+        $limit = (int) $request->query('limit');
+
+        $customers = Customer::with(['domainMaterials', 'hostingMaterial', 'sslMaterial'])->orderBy('due_date');
+
+        if ($limit) $customers->limit($limit);
+
+        $customers = $customers->get();
+
         return new CustomerCollection($customers);
     }
 

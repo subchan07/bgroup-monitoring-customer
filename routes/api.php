@@ -16,7 +16,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/current', [AuthController::class, 'current']);
     Route::post('/user/profile', [AuthController::class, 'editProfile']);
 
-    Route::get('/material/summaryByMonth', [MaterialController::class, 'summaryByMonth']);
 
     Route::post('/material/bayar', [MaterialController::class, 'bayar']);
     Route::apiResource('/material', MaterialController::class);
@@ -24,5 +23,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/customer/bayar', [CustomerController::class, 'bayar']);
     Route::apiResource('/customer', CustomerController::class);
 
+    Route::get('/payment/annual-summary', [PaymentController::class, 'getAnnualPaymentSummary']);
     Route::apiResource('/payment', PaymentController::class)->except(['store', 'update', 'update']);
 });

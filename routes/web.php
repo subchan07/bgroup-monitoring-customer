@@ -22,7 +22,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('logout', 'logout')->name('logout');
 
-    Route::get('user/profile', 'profileView')->middleware('auth');
+    Route::get('user/profile', 'profileView')->name('user.profile')->middleware('auth');
 });
 
 Route::middleware('auth')->group(function () {

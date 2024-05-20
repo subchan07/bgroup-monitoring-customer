@@ -34,10 +34,10 @@
                         <p class="mb-1 mt-3 fw-semibold">{{ auth()->user()->name }}</p>
                         <p class="fw-light text-muted mb-0">{{ auth()->user()->email }}</p>
                     </div>
-                    {{-- <a class="dropdown-item">
+                    <a class="dropdown-item" href="{{ route('user.profile') }}">
                         <i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i>
-                        My Profile <span class="badge badge-pill badge-danger">1</span>
-                    </a> --}}
+                        My Profile
+                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="dropdown-item logoutForm">
                         @csrf
                         <button type="submit" class="btn p-0 btn-lig p-0 m-0">
@@ -48,8 +48,7 @@
                 </div>
             </li>
         </ul>
-        <button class="navbar-toggler navbar-toggler-right d-lg-none" type="button"
-            data-bs-toggle="offcanvas">
+        <button class="navbar-toggler navbar-toggler-right d-lg-none" type="button" data-bs-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>
         </button>
     </div>
