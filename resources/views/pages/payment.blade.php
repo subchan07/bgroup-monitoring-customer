@@ -15,7 +15,7 @@
 
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-hover" id="tableContent">
+                        <table class="table table-hover" id="datatable">
                             <thead>
                                 <tr>
                                     <th>Kategori</th>
@@ -44,12 +44,27 @@
 @endsection
 
 @push('scripts')
+    {{-- Detail Customer --}}
+    <x-modal title="Detail Customer" idModal="detailCustomerModal">
+        <div class="modal-body">
+            <table class="table table-sm">
+                <tbody id="tbodyDetailModal">
+                </tbody>
+            </table>
+        </div>
+    </x-modal>
+
     <script>
         const tbody = $('#tbodyPayment');
 
         $(() => {
             // Muat data payment saat halaman pertama kali dimuat
             getAllPayment();
+
+            tbody.on('click', '.btn-detail-customer', (event) => {
+                const idEl = $(event.target).data('customer')
+                handleDetailCustomerButtonCLick(idEl)
+            })
         });
 
 
@@ -63,9 +78,10 @@
                     tbody.append(displayTbody(data));
                 });
 
-                if (results.length === 0) tbody.append('<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
+                if (results.length === 0) tbody.append(
+                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
 
-                if (results.length > 0) loadDataTable('.table')
+                if (results.length > 0) loadDataTable('#datatable')
             }, 'json');
         };
 
@@ -74,7 +90,7 @@
             const material = data.material
             const customer = data.customer
             const hostingCustomer = customer === null ? null : customer.hostingMaterial
-            const domainCustomer = customer === null ? null : customer.domainMaterial
+            const domainCustomer = customer === null ? null : customer.domainMaterials
             const sslCustomer = customer === null ? null : customer.sslMaterial
 
             const {
@@ -89,10 +105,7 @@
                         <td>${material === null ? 'material' : 'customer'}</td>
                         <td>
                             ${material === null ? '' : material.item}
-                            ${customer === null ? '' : customer.name+ '<br>'}
-                            ${hostingCustomer === null ? '' : '<strong>hosting:</strong> '+ hostingCustomer.item + '<br>'}
-                            ${domainCustomer === null ? '' : '<strong>domain:</strong> '+ domainCustomer.item + '<br>'}
-                            ${sslCustomer === null ? '' : '<strong>ssl:</strong> '+ sslCustomer.item + '<br>'}
+                            ${customer === null ? '' : customer.name + "  <a href='#' class='btn-detail-customer text-muted' data-customer="+customer.id+">lihat detail...</a>"}
                         </td>
                         <td>${date}</td>
                         <td>${due_date}</td>
@@ -100,5 +113,45 @@
                         <td>${rupiah(payment_amount)}</td>
                     </tr>`;
         };
+
+        // Detail data customer
+        const handleDetailCustomerButtonCLick = (idEl) => {
+            $.ajax({
+                url: `/api/customer/${idEl}?withMaterial=true`,
+                type: "GET",
+                cache: false,
+                beforeSend: () => setButtonDisabled($('.btn-action'), true),
+                complete: () => setButtonDisabled($('.btn-action'), false),
+                success: (result, status) => {
+                    const {
+                        sslMaterial,
+                        domainMaterials,
+                        hostingMaterial
+                    } = result.data
+
+                    let html = ''
+                    domainMaterials.forEach((data, i) => html += displayDetailCustomer(`Domain ${i+1}`,
+                        data))
+                    html += displayDetailCustomer('Hosting', hostingMaterial)
+                    html += displayDetailCustomer('SSL', sslMaterial)
+
+                    $('#tbodyDetailModal').html(html)
+                    $('#detailCustomerModal').modal('show')
+                }
+            })
+        }
+
+        const displayDetailCustomer = (title, object) => {
+            if (object) {
+                return `<tr>
+                            <td><span class="fw-bold">${title}</span></td>
+                            <td><span class="fw-bold">Item:</span> ${object.item}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><span class="fw-bold">Harga:</span> ${rupiah(object.price)}</td>
+                        </tr><tr><td colspan="2" class="border-0">&nbsp;</td></tr>`
+            }
+        }
     </script>
 @endpush

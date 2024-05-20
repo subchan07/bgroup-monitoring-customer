@@ -20,7 +20,11 @@ class CustomerController extends Controller
     {
         $limit = (int) $request->query('limit');
 
-        $customers = Customer::with(['domainMaterials', 'hostingMaterial', 'sslMaterial'])->orderBy('due_date');
+        $orderBy = $request->query('orderBy') ?? 'due_date';
+        $orderByDirection = $request->query('direction') ?? 'asc';
+        [$orderByColumn, $orderByDirection] = Customer::checkTableName($orderBy ?? 'due_date', $orderByDirection ?? 'asc');
+
+        $customers = Customer::with(['domainMaterials', 'hostingMaterial', 'sslMaterial'])->orderBy($orderByColumn ?? 'due_date', $orderByDirection ?? 'asc');
 
         if ($limit) $customers->limit($limit);
 
@@ -128,7 +132,7 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function bayar(Request $request): JsonResponse
+    public function pay(Request $request): JsonResponse
     {
         $customer = $this->__checkIdExists($request->input('customer_id'));
 
@@ -136,7 +140,6 @@ class CustomerController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'date' => 'required|date',
             'due_date' => 'required|date',
-            'price' => 'required|decimal:0,2',
             'payment_amount' => 'required|decimal:0,2',
         ]);
 
@@ -147,22 +150,16 @@ class CustomerController extends Controller
             ], 400));
         }
 
+        // Payment Create
         $validated = $validator->validate();
-        if ($validated['payment_amount'] != $customer->price) {
-            throw new HttpResponseException(response()->json([
-                'success' => false,
-                'errors' => [
-                    'payment_amount' => ['Nilai pembayaran harus sama dengan harga lama.']
-                ]
-            ], 400));
-        }
-
         $validated['due_date'] = $customer->due_date;
         $validated['price'] = $customer->price;
+        $validated['payment_amount'] = $customer->price;
         Payment::create($validated);
 
+        // Customer update
         $customer->update([
-            'price' => $request->input('price'),
+            'price' => $request->input('payment_amount'),
             'due_date' => $request->input('due_date'),
         ]);
 

@@ -23,7 +23,7 @@ class PaymentController extends Controller
         $year = (int) $request->query('year');
 
         $payments = Payment::query()->with(['material', 'customer' => function ($query) {
-            $query->with(['domainMaterial', 'hostingMaterial', 'sslMaterial']);
+            $query->with(['domainMaterials', 'hostingMaterial', 'sslMaterial']);
         }]);
 
         if ($limit) $payments->limit($limit);

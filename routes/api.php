@@ -16,11 +16,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/current', [AuthController::class, 'current']);
     Route::post('/user/profile', [AuthController::class, 'editProfile']);
 
-
-    Route::post('/material/bayar', [MaterialController::class, 'bayar']);
+    Route::post('/material/pay', [MaterialController::class, 'pay']);
     Route::apiResource('/material', MaterialController::class);
 
-    Route::post('/customer/bayar', [CustomerController::class, 'bayar']);
+    Route::post('/customer/pay', [CustomerController::class, 'pay']);
     Route::apiResource('/customer', CustomerController::class);
 
     Route::get('/payment/annual-summary', [PaymentController::class, 'getAnnualPaymentSummary']);

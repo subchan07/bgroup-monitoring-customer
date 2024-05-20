@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Schema;
 
 class Customer extends Model
 {
@@ -30,5 +31,16 @@ class Customer extends Model
     public function sslMaterial(): BelongsTo
     {
         return $this->belongsTo(Material::class, 'ssl_material_id');
+    }
+
+    public static function checkTableName($column, $order = 'asc')
+    {
+        $validColumns = Schema::getColumnListing('customers');
+        $validOrder = ['asc', 'desc'];
+
+        if (!in_array($column, $validColumns)) $column = 'due_date';
+        if (!in_array($order, $validOrder)) $order = 'asc';
+
+        return [$column, $order];
     }
 }

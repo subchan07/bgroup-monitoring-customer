@@ -28,6 +28,7 @@ $(() => {
                     ? displayError(x.responseJSON.errors)
                     : "Terjadi kesalahan saat memuat data.";
                 flashMessage("Error", errorMessage, e);
+                return;
             }
 
             flashMessage("Error", x.responseJSON.message, "error");

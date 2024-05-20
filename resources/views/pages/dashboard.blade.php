@@ -1,6 +1,14 @@
 @extends('layouts.app')
 
 @push('styles')
+    <style>
+        .line-clamp-1 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+        }
+    </style>
 @endpush
 
 @section('content')
@@ -13,10 +21,6 @@
                             <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab"
                                 aria-controls="overview" aria-selected="true">Overview</a>
                         </li>
-                        {{-- <li class="nav-item">
-                            <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#audiences" role="tab"
-                                aria-selected="false">Audiences</a>
-                        </li> --}}
                     </ul>
                     <div>
                         <div class="btn-wrapper">
@@ -35,7 +39,7 @@
                                         <p class="statistics-title">Material</p>
                                         <h3 class="rate-percentage" id="profitMaterial">0</h3>
                                         <div class="text-muted">
-                                            <p class="mb-0" id="yearPotensiProfit">2024-2025</p>
+                                            <p class="mb-0 yearPotensiProfit">year</p>
                                             <p class="fw-semibold mb-0" id="nilaiPotensiProfitMaterial">Rp. 0</p>
                                         </div>
                                     </div>
@@ -43,7 +47,7 @@
                                         <p class="statistics-title">User</p>
                                         <h3 class="rate-percentage" id="profitUser">0</h3>
                                         <div class="text-muted">
-                                            <p class="mb-0" id="yearPotensiProfit">2024-2025</p>
+                                            <p class="mb-0 yearPotensiProfit">year</p>
                                             <p class="fw-semibold mb-0" id="nilaiPotensiProfitUser">Rp. 0</p>
                                         </div>
                                     </div>
@@ -157,13 +161,15 @@
         const currentYear = new Date().getFullYear()
         const filterChart = $('#filterChart')
         $(() => {
-            summaryByMonth()
-            getAllCustomer()
+            $('.yearPotensiProfit').html(`${currentYear}-${currentYear+1}`)
+
+            annualSummary()
             getAllMaterial()
+            getAllCustomer()
 
             filterChart.on('change', (e) => {
                 const year = filterChart.val()
-                summaryByMonth(year)
+                annualSummary(year)
             })
         })
 
@@ -172,30 +178,28 @@
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         const getAllCustomer = () => {
-            $.get('/api/customer?limit=5', (results, status) => {
+            $.get('/api/customer?orderBy=price&direction=desc&limit=10', (results, status) => {
+                const recentEvent = $('#customerRecent')
                 const datas = results.data;
 
-                let recentEvent = ''
-                datas.forEach((data, index) => {
-                    recentEvent += displayRecentEvent(data.name, data.due_date)
-                });
-                $('#customerRecent').html(recentEvent)
+                recentEvent.html('')
+                datas.forEach((data, index) => recentEvent.append(displayRecentEvent(data.name, data.due_date,
+                    data.price)));
             }, 'json');
         }
 
         const getAllMaterial = () => {
-            $.get('/api/material?limit=5', (results, status) => {
+            $.get('/api/material?orderBy=price&direction=desc&limit=10', (results, status) => {
+                const recentEvent = $('#materialRecent')
                 const datas = results.data;
 
-                let recentEvent = ''
-                datas.forEach((data, index) => {
-                    recentEvent += displayRecentEvent(data.item, data.due_date)
-                });
-                $('#materialRecent').html(recentEvent)
+                recentEvent.html('')
+                datas.forEach((data, index) => recentEvent.append(displayRecentEvent(data.item, data.due_date,
+                    data.price)));
             }, 'json');
         }
 
-        const summaryByMonth = (year) => {
+        const annualSummary = (year) => {
             let queryParam = year ? `?year=${year}` : ''
 
             $.get(`/api/payment/annual-summary${queryParam}`, (results, status) => {
@@ -228,7 +232,7 @@
             })
         }
 
-        const displayRecentEvent = (keterangan, due_date) => {
+        const displayRecentEvent = (keterangan, due_date, price) => {
             const date = new Date(due_date);
             const month = months[date.getMonth()];
             const day = date.getDate();
@@ -236,10 +240,10 @@
 
             return `<div class="list align-items-center border-bottom py-2">
                         <div class="wrapper w-100">
-                            <p class="mb-2 fw-medium"> ${keterangan} </p>
-                            <div class="d-flex align-items-center">
-                                <i class="mdi mdi-calendar text-muted me-1"></i>
-                                <p class="mb-0 text-small text-muted">${month} ${day}, ${year}</p>
+                            <p class="mb-2 fw-medium line-clamp-1"> ${keterangan} </p>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <p class="mb-0 text-small text-muted"><i class="mdi mdi-calendar me-1"></i><span>${month} ${day}, ${year}</span></p>
+                                <p class="mb-0 text-small text-muted"><i class="mdi mdi-cash me-1"></i><span>${rupiah(price)}</span></p>
                             </div>
                         </div>
                     </div>`

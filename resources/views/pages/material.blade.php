@@ -228,12 +228,9 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="inputPricePayment" class="col-sm-3 col-form-label">Harga
-                        <span class="text-danger">*</span></label>
+                    <label for="inputPricePayment" class="col-sm-3 col-form-label">Harga</label>
                     <div class="col-sm-9">
-                        <input type="number" name="price" id="inputPricePayment" class="form-control" step="0.01"
-                            required />
-                        <p class="text-muted my-0">Ubah untuk data bayar berikutnya.</p>
+                        <input type="number" id="inputPricePayment" class="form-control" readonly />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -242,6 +239,7 @@
                     <div class="col-sm-9">
                         <input type="number" name="payment_amount" id="inputPaymentAmount" class="form-control"
                             step="0.01" required />
+                        <p class="text-muted my-0">Ubah untuk data bayar berikutnya.</p>
                     </div>
                 </div>
             </div>
@@ -299,7 +297,7 @@
 
             paymentForm.submit((event) => {
                 event.preventDefault()
-                handleFormSubmit(paymentForm, `/api/material/bayar`, 'POST')
+                handleFormSubmit(paymentForm, `/api/material/pay`, 'POST')
             })
 
             // Event delegation untuk tombol klik di dalam tbodyMaterial

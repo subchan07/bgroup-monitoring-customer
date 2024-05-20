@@ -19,15 +19,15 @@ class MaterialController extends Controller
      */
     public function index(Request $request): MaterialCollection
     {
-        $materials = Material::orderBy('due_date');
-
         $filterMaterial = $request->query('material');
         $unusedByCustomers = $request->query('unused_by_customers');
         $limit = (int) $request->query('limit');
 
-        if ($filterMaterial && $filterMaterial !== 'all') {
-            $materials->where('material', $filterMaterial);
-        }
+        $orderBy = $request->query('orderBy') ?? 'due_date';
+        $orderByDirection = $request->query('direction') ?? 'asc';
+        [$orderByColumn, $orderByDirection] = Material::checkTableName($orderBy ?? 'due_date', $orderByDirection ?? 'asc');
+
+        $materials = Material::orderBy($orderByColumn ?? 'due_date', $orderByDirection ?? 'asc');
 
         if ($unusedByCustomers) {
             $materials->where(function ($query) {
@@ -43,6 +43,7 @@ class MaterialController extends Controller
             });
         }
 
+        if ($filterMaterial && $filterMaterial !== 'all') $materials->where('material', $filterMaterial);
         if ($limit) $materials->limit($limit);
 
         $materials = $materials->get();
@@ -135,7 +136,7 @@ class MaterialController extends Controller
         ]);
     }
 
-    public function bayar(Request $request): JsonResponse
+    public function pay(Request $request): JsonResponse
     {
         $material = $this->__checkIdExists($request->input('material_id'));
 
@@ -143,7 +144,6 @@ class MaterialController extends Controller
             'material_id' => 'required|exists:materials,id',
             'date' => 'required|date',
             'due_date' => 'required|date',
-            'price' => 'required|decimal:0,2',
             'payment_amount' => 'required|decimal:0,2',
         ]);
 
@@ -154,22 +154,16 @@ class MaterialController extends Controller
             ], 400));
         }
 
+        // Payment Create
         $validated = $validator->validate();
-        if ($validated['payment_amount'] != $material->price) {
-            throw new HttpResponseException(response()->json([
-                'success' => false,
-                'errors' => [
-                    'payment_amount' => ['Nilai pembayaran harus sama dengan harga lama.']
-                ]
-            ], 400));
-        }
-
         $validated['due_date'] = $material->due_date;
         $validated['price'] = $material->price;
+        $validated['payment_amount'] = $material->price;
         Payment::create($validated);
 
+        // material update
         $material->update([
-            'price' => $request->input('price'),
+            'price' => $request->input('payment_amount'),
             'due_date' => $request->input('due_date'),
         ]);
 
