@@ -157,13 +157,12 @@ class MaterialController extends Controller
         // Payment Create
         $validated = $validator->validate();
         $validated['due_date'] = $material->due_date;
-        $validated['price'] = $material->price;
-        $validated['payment_amount'] = $material->price;
+        $validated['price'] = $validated['payment_amount'];
         Payment::create($validated);
 
         // material update
         $material->update([
-            'price' => $request->input('payment_amount'),
+            'price' => $validated['payment_amount'],
             'due_date' => $request->input('due_date'),
         ]);
 

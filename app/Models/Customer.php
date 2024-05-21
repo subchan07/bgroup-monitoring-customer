@@ -13,7 +13,7 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'domain', 'due_date', 'price', 'hosting_material_id', 'ssl_material_id'];
+    protected $fillable = ['name', 'service', 'domain', 'due_date', 'price', 'hosting_material_id', 'ssl_material_id'];
 
 
     public function domainMaterials(): BelongsToMany

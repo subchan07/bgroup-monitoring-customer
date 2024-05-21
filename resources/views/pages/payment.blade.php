@@ -47,10 +47,12 @@
     {{-- Detail Customer --}}
     <x-modal title="Detail Customer" idModal="detailCustomerModal">
         <div class="modal-body">
-            <table class="table table-sm">
-                <tbody id="tbodyDetailModal">
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <tbody id="tbodyDetailModal">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </x-modal>
 
@@ -100,12 +102,12 @@
                 price,
                 payment_amount
             } = data;
-
+            // "  <a href='#' class='btn-detail-customer text-muted' data-customer="+customer.id+">lihat detail...</a>"
             return `<tr data-id="${id}">
-                        <td>${material === null ? 'material' : 'customer'}</td>
+                        <td>${material !== null ? 'material' : 'customer'}</td>
                         <td>
                             ${material === null ? '' : material.item}
-                            ${customer === null ? '' : customer.name + "  <a href='#' class='btn-detail-customer text-muted' data-customer="+customer.id+">lihat detail...</a>"}
+                            ${customer === null ? '' : customer.name}
                         </td>
                         <td>${date}</td>
                         <td>${due_date}</td>

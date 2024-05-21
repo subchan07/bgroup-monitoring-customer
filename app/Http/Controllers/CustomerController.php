@@ -41,6 +41,8 @@ class CustomerController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
+            'other_name' => 'required_if:name,other',
+            'service' => 'required|in:website,laporanusaha',
             'domain' => 'required|string',
             'due_date' => 'required|date',
             'price' => 'required|decimal:0,2',
@@ -57,7 +59,8 @@ class CustomerController extends Controller
             ], 400));
         }
 
-        $validated = $request->except(['domain_material_ids']);
+        $validated = $request->except(['domain_material_ids', 'other_name']);
+        $validated['name'] = $validated['name'] == 'other' ? $request->input('other_name') : $validated['name'];
         $customer = Customer::create($validated);
 
         $domainIds = $request->input('domain_material_ids');
@@ -89,6 +92,8 @@ class CustomerController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
+            'other_name' => 'required_if:name,other',
+            'service' => 'required|in:website,laporanusaha',
             'domain' => 'required|string',
             'due_date' => 'required|date',
             'price' => 'required|decimal:0,2',
@@ -106,6 +111,7 @@ class CustomerController extends Controller
         }
 
         $validated = $request->except('domain_material_ids');
+        $validated['name'] = $validated['name'] == 'other' ? $request->input('other_name') : $validated['name'];
         $customer->update($validated);
 
         $domainIds = $request->input('domain_material_ids');
@@ -153,13 +159,12 @@ class CustomerController extends Controller
         // Payment Create
         $validated = $validator->validate();
         $validated['due_date'] = $customer->due_date;
-        $validated['price'] = $customer->price;
-        $validated['payment_amount'] = $customer->price;
+        $validated['price'] = $validated['payment_amount'];
         Payment::create($validated);
 
         // Customer update
         $customer->update([
-            'price' => $request->input('payment_amount'),
+            'price' => $validated['payment_amount'],
             'due_date' => $request->input('due_date'),
         ]);
 

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('service', 20);
             $table->string('domain');
             $table->date('due_date');
             $table->decimal('price', 12);

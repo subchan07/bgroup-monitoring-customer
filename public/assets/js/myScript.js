@@ -174,3 +174,8 @@ function ifTrueDisabled(input, target, value) {
     const currentVal = $(input).val();
     $(target).prop("disabled", currentVal != value);
 }
+
+function showHideElement(input, target, value){
+    const currentVal = $(input).val();
+    $(target).toggleClass("d-none", currentVal != value).prop('required', currentVal == value);
+}

@@ -24,6 +24,7 @@
                                 <tr>
                                     <th>Batas Waktu</th>
                                     <th>Customer</th>
+                                    <th>Layanan</th>
                                     <th>Domain</th>
                                     <th>Domain M</th>
                                     <th>Hosting M</th>
@@ -74,11 +75,28 @@
         <form action="#" method="POST" id="addForm">
             @csrf
             <div class="modal-body">
-                <div class="form-group row">
+                <div class="form-group row justify-content-end">
                     <label for="inputName" class="col-sm-3 col-form-label">Customer <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="text" name="name" id="inputName" class="form-control" required />
+                        <select name="name" id="inputName" class="form-select text-dark select-customer js-example-basic-single"
+                            data-target_id="#inputOtherName" required>
+                            <option value="">-- pilih --</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="text" name="other_name" id="inputOtherName" class="form-control d-none" placeholder="customer..." />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputService" class="col-sm-3 col-form-label">Layanan <span
+                            class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        <select name="service" id="inputService" class="form-select text-dark" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="website">Website</option>
+                            <option value="laporanusaha">Laporan Usaha</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -140,11 +158,28 @@
             @method('PUT')
             <div class="modal-body">
                 <input type="hidden" id="inputIdEdit">
-                <div class="form-group row">
+                <div class="form-group row justify-content-end">
                     <label for="inputNameEdit" class="col-sm-3 col-form-label">Customer <span
                             class="text-danger">*</span></label>
                     <div class="col-sm-9">
-                        <input type="text" name="name" id="inputNameEdit" class="form-control" required />
+                        <select name="name" id="inputNameEdit" class="form-select text-dark select-customer js-example-basic-single"
+                            data-target_id="#inputOtherNameEdit" required>
+                            <option value="">-- pilih --</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-9">
+                        <input type="text" name="other_name" id="inputOtherNameEdit" class="form-control d-none" placeholder="customer..." />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputServiceEdit" class="col-sm-3 col-form-label">Layanan <span
+                            class="text-danger">*</span></label>
+                    <div class="col-sm-9">
+                        <select name="service" id="inputServiceEdit" class="form-select text-dark" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="website">Website</option>
+                            <option value="laporanusaha">Laporan Usaha</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-group row">
@@ -254,10 +289,12 @@
     {{-- Detail  --}}
     <x-modal title="Detail Customer" idModal="detailCustomerModal">
         <div class="modal-body">
-            <table class="table table-sm">
-                <tbody id="tbodyDetailModal">
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <tbody id="tbodyDetailModal">
+                    </tbody>
+                </table>
+            </div>
         </div>
     </x-modal>
 
@@ -272,6 +309,7 @@
         const addForm = $('#addForm')
         const updateForm = $('#updateForm')
         const paymentForm = $('#paymentForm')
+        const selectCustomer = $('.select-customer')
         const selectDomain = $('.select-domain')
         const selectHosting = $('.select-hosting')
         const selectSsl = $('.select-ssl')
@@ -327,6 +365,13 @@
                 const idEl = $(event.target).closest('tr').data('id')
                 handleDetailButtonCLick(idEl)
             })
+
+            selectCustomer.on('change', (event) => {
+                const targetIdEl = $(event.target).data('target_id')
+                console.log(event.target);
+                console.log(targetIdEl);
+                showHideElement(event.target, targetIdEl, 'other')
+            })
         });
 
         // Fungsi untuk mendapatkan semua data material
@@ -359,6 +404,7 @@
                     potentialProfitNextYear = 0
 
                 tbody.html('')
+                selectCustomer.html("<option selected value=''>-- Pilih --</option>")
                 results.forEach(data => {
                     const year = new Date(data.due_date).getFullYear();
                     const price = parseFloat(data.price);
@@ -368,17 +414,19 @@
                     if (nextYear === year) potentialProfitNextYear += price;
 
                     tbody.append(displayTbody(data))
+                    selectCustomer.append(`<option value="${data.name}">${data.name}</option>`)
                 });
 
                 if (results.length === 0) tbody.append(
-                    '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
+                    '<tr><td colspan="9" class="text-center">Data tidak ditemukan.</td></tr>')
 
                 if (results.length > 0) {
+                    loadDataTable('#datatable');
+
                     tfootTotalHargaText.html(rupiah(totalHarga));
                     tfootPotentialProfitThisYearText.html(rupiah(potentialProfitThisYear));
                     tfootPotentialProfitNextYearText.html(rupiah(potentialProfitNextYear));
-
-                    loadDataTable('#datatable');
+                    selectCustomer.append(`<option value="other"><strong>Lainnya...</strong></option>`)
                 }
 
                 getAllMaterial();
@@ -390,6 +438,7 @@
             const {
                 id,
                 name,
+                service,
                 domain,
                 due_date,
                 price,
@@ -402,6 +451,7 @@
             return `<tr data-id="${id}">
                         <td>${due_date} <span class="badge badge-${badgeClassReminder(reminderDueDate)}">${reminderDueDate}</span></td>
                         <td>${name}</td>
+                        <td>${service}</td>
                         <td>${domain}</td>
                         <td class="text-center">${domainMaterials && domainMaterials.length === 0 ? minusIcon : checkIcon}</td>
                         <td class="text-center">${hostingMaterial === null ? minusIcon : checkIcon}</td>
@@ -432,6 +482,7 @@
                     const {
                         id,
                         name,
+                        service,
                         domain,
                         due_date,
                         price,
@@ -461,6 +512,8 @@
 
                     $('#inputIdEdit').val(id);
                     $('#inputNameEdit').val(name);
+                    $('#inputOtherNameEdit').addClass('d-none').removeAttr('required')
+                    $('#inputServiceEdit').val(service)
                     $('#inputDomainEdit').val(domain);
                     $('#inputDueDateEdit').val(due_date);
                     $('#inputPriceEdit').val(price);
