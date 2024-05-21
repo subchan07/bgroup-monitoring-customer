@@ -368,8 +368,6 @@
 
             selectCustomer.on('change', (event) => {
                 const targetIdEl = $(event.target).data('target_id')
-                console.log(event.target);
-                console.log(targetIdEl);
                 showHideElement(event.target, targetIdEl, 'other')
             })
         });
