@@ -54,6 +54,10 @@
                                     <div>
                                         <p class="statistics-title">Profit</p>
                                         <h3 class="rate-percentage" id="profitTotal" title="(user - material)">0</h3>
+                                        <div class="text-muted">
+                                            <p class="mb-0 yearPrevProfitTotal">year</p>
+                                            <p class="fw-semibold mb-0" id="nilaiPotensiTotal">Rp. 0</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -162,6 +166,7 @@
         const filterChart = $('#filterChart')
         $(() => {
             $('.yearPotensiProfit').html(`${currentYear}-${currentYear+1}`)
+            $('.yearPrevProfitTotal').html(`${currentYear -1}-${currentYear}`)
 
             annualSummary()
             getAllMaterial()
@@ -183,8 +188,10 @@
                 const datas = results.data;
 
                 recentEvent.html('')
-                datas.forEach((data, index) => recentEvent.append(displayRecentEvent(data.name, data.due_date,
-                    data.price)));
+                datas.forEach((data, index) => {
+                    let name = `${data.service} - ${data.name}`
+                    recentEvent.append(displayRecentEvent(name, data.due_date, data.price))
+                });
             }, 'json');
         }
 
@@ -210,19 +217,38 @@
                     customer_summary_current_year,
                     total_summary_current_year,
                 } = results.data
-                const {
-                    total_price_material,
-                    total_price_customer,
-                    total_price
-                } = results.data.paymentSummary
+                const annualSummary = results.data.paymentSummary
+                let currentTotalPriceMaterial = 0,
+                    currentTotalPriceCustomer = 0,
+                    currentTotalPrice = 0,
+                    prevTotalPrice = 0
 
-                $('#profitMaterial').html(rupiah(total_price_material))
+                if (annualSummary[0]?.year == currentYear) {
+                    currentTotalPriceMaterial = parseInt(annualSummary[0]?.total_price_material)
+                    currentTotalPriceCustomer = parseInt(annualSummary[0]?.total_price_customer)
+                    currentTotalPrice = parseInt(annualSummary[0]?.total_price)
+                }
+
+                if (annualSummary[1]?.year == (currentYear - 1)) {
+                    prevTotalPrice = parseInt(annualSummary[1].total_price)
+                }
+
+                $('#profitMaterial').html(rupiah(currentTotalPriceMaterial))
                 $('#nilaiPotensiProfitMaterial').html(rupiah(material_summary_current_year))
+                    .addClass(currentTotalPriceMaterial > material_summary_current_year ?
+                        'text-danger' :
+                        'text-success')
 
-                $('#profitUser').html(rupiah(total_price_customer))
+                $('#profitUser').html(rupiah(currentTotalPriceCustomer))
                 $('#nilaiPotensiProfitUser').html(rupiah(customer_summary_current_year))
+                    .addClass(currentTotalPriceCustomer > customer_summary_current_year ?
+                        'text-danger' :
+                        'text-success')
 
-                $('#profitTotal').html(rupiah(total_price))
+                $('#profitTotal').html(rupiah(currentTotalPrice))
+                $('#nilaiPotensiTotal').html(rupiah(prevTotalPrice))
+                    .addClass(currentTotalPrice > prevTotalPrice ? 'text-danger' :
+                        'text-success')
 
                 initChart(monthly_customer_summary)
 

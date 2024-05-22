@@ -102,10 +102,13 @@ class PaymentController extends Controller
 
         // calculate the total profit fot the current year form payments
         $paymentsSummary = Payment::selectRaw('
+            YEAR(date) as year,
             SUM(CASE WHEN material_id IS NOT NULL THEN payment_amount ELSE 0 END) AS total_price_material,
             SUM(CASE WHEN customer_id IS NOT NULL THEN payment_amount ELSE 0 END) AS total_price_customer,
             SUM(payment_amount) AS total_price
-        ')->whereYear('date', $currentYear)->first();
+        ')->whereYear('date', $currentYear)
+            ->orWhereYear('date', $currentYear - 1)
+            ->groupBy('year')->orderBy('year', 'desc')->get();
 
         return response()->json([
             'data' => [
@@ -114,11 +117,7 @@ class PaymentController extends Controller
                 'material_summary_current_year' => $sumMaterialCurrentYear,
                 'customer_summary_current_year' => $sumCustomerCurrentYear,
                 'total_summary_current_year' => $totalSummaryCurrentYear,
-                'paymentSummary' => [
-                    'total_price_material' => $paymentsSummary->total_price_material,
-                    'total_price_customer' => $paymentsSummary->total_price_customer,
-                    'total_price' => $paymentsSummary->total_price
-                ]
+                'paymentSummary' => $paymentsSummary
             ],
             'success' => true,
         ]);

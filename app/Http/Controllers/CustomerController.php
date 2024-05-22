@@ -159,7 +159,7 @@ class CustomerController extends Controller
         // Payment Create
         $validated = $validator->validate();
         $validated['due_date'] = $customer->due_date;
-        $validated['price'] = $validated['payment_amount'];
+        $validated['price'] = $customer->price;
         Payment::create($validated);
 
         // Customer update

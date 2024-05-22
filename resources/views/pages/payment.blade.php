@@ -35,6 +35,16 @@
                                     @endfor
                                 </tr>
                             </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>Total Harga</td>
+                                    <td id="tfootTotalHarga">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Bayar</td>
+                                    <td id="tfootTotalBayar">-</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -58,6 +68,8 @@
 
     <script>
         const tbody = $('#tbodyPayment');
+        const tfootTotalHarga = $('#tfootTotalHarga');
+        const tfootTotalBayar = $('#tfootTotalBayar')
 
         $(() => {
             // Muat data payment saat halaman pertama kali dimuat
@@ -74,16 +86,23 @@
         const getAllPayment = () => {
             $.get('/api/payment', (result, status) => {
                 const results = result.data
+                let totalHarga= 0, totalBayar=0
 
                 tbody.html('')
                 results.forEach(data => {
+                    totalHarga += parseInt(data.price)
+                    totalBayar += parseInt(data.payment_amount)
                     tbody.append(displayTbody(data));
                 });
 
                 if (results.length === 0) tbody.append(
                     '<tr><td colspan="8" class="text-center">Data tidak ditemukan.</td></tr>')
 
-                if (results.length > 0) loadDataTable('#datatable')
+                if (results.length > 0){
+                    loadDataTable('#datatable')
+                    tfootTotalBayar.html(rupiah(totalBayar))
+                    tfootTotalHarga.html(rupiah(totalHarga))
+                }
             }, 'json');
         };
 
@@ -91,28 +110,22 @@
         const displayTbody = (data) => {
             const material = data.material
             const customer = data.customer
-            const hostingCustomer = customer === null ? null : customer.hostingMaterial
-            const domainCustomer = customer === null ? null : customer.domainMaterials
-            const sslCustomer = customer === null ? null : customer.sslMaterial
+            // const hostingCustomer = customer ? customer.hostingMaterial : null
+            // const domainCustomer = customer ? customer.domainMaterials : null
+            // const sslCustomer = customer ? customer.sslMaterial : null
+            let namaItem = material ? material.item :
+                `<span class="fw-bold">${customer.service}:</span> ${customer.name}`
 
-            const {
-                id,
-                date,
-                due_date,
-                price,
-                payment_amount
-            } = data;
+            const {id, date, due_date, price, payment_amount} = data;
+
             // "  <a href='#' class='btn-detail-customer text-muted' data-customer="+customer.id+">lihat detail...</a>"
             return `<tr data-id="${id}">
-                        <td>${material !== null ? 'material' : 'customer'}</td>
-                        <td>
-                            ${material === null ? '' : material.item}
-                            ${customer === null ? '' : customer.name}
-                        </td>
+                        <td>${material ? 'material' : 'customer'}</td>
+                        <td>${namaItem}</td>
                         <td>${date}</td>
                         <td>${due_date}</td>
                         <td>${rupiah(price)}</td>
-                        <td>${rupiah(payment_amount)}</td>
+                        <td>${rupiah(payment_amount)} <span class="badge badge-opacity-${(price > payment_amount) ? 'danger' : 'success'}"><i class="mdi mdi-arrow-${(price> payment_amount) ? 'down' : 'up'}-thick"></i></span></td>
                     </tr>`;
         };
 
