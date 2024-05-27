@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Resources\PaymentResource;
 use App\Http\Resources\PaymentCollection;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class PaymentController extends Controller
@@ -41,6 +42,32 @@ class PaymentController extends Controller
     {
         $result = $this->__checkIdExists($payment);
         return new PaymentResource($result);
+    }
+
+    public function update(Request $request, int $payment): JsonResponse
+    {
+        $result = $this->__checkIdExists($payment);
+
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+            'due_date' => 'required|date',
+            'payment_amount' => 'required|decimal:0,2',
+        ]);
+
+        if ($validator->fails()) {
+            throw new HttpResponseException(response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+            ], 400));
+        }
+
+        $validated = $validator->validate();
+        $result->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Payment berhasil diedit.',
+        ]);
     }
 
     /**

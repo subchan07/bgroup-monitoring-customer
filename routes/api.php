@@ -23,5 +23,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('/customer', CustomerController::class);
 
     Route::get('/payment/annual-summary', [PaymentController::class, 'getAnnualPaymentSummary']);
-    Route::apiResource('/payment', PaymentController::class)->except(['store', 'update', 'update']);
+    Route::apiResource('/payment', PaymentController::class)->except(['store', 'destroy']);
 });
