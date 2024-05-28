@@ -145,6 +145,7 @@ class MaterialController extends Controller
             'date' => 'required|date',
             'due_date' => 'required|date',
             'payment_amount' => 'required|decimal:0,2',
+            'file' => 'nullable|mimes:jpg,jpeg,png',
         ]);
 
         if ($validator->fails()) {
@@ -155,9 +156,15 @@ class MaterialController extends Controller
         }
 
         // Payment Create
-        $validated = $validator->validate();
+        $validated = $request->except(['file']);
         $validated['due_date'] = $material->due_date;
         $validated['price'] = $material->price;
+
+        $file = $request->file('file');
+        if ($file) {
+            $path = $file->store('payment');
+            $validated['file'] = $path;
+        }
         Payment::create($validated);
 
         // material update

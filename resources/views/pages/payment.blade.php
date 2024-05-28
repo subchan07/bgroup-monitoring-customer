@@ -57,7 +57,7 @@
 @push('scripts')
     {{-- Edit Modal --}}
     <x-modal title="Edit Data" idModal="editPaymentModal">
-        <form action="#" method="POST" id="updateForm">
+        <form action="#" method="POST" id="updateForm" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="modal-body">
@@ -79,8 +79,7 @@
                 <div class="form-group row">
                     <label for="inputPriceEdit" class="col-sm-3 col-form-label">Harga</label>
                     <div class="col-sm-9">
-                        <input type="number" id="inputPriceEdit" step="0.01"
-                            class="form-control" readonly/>
+                        <input type="number" id="inputPriceEdit" step="0.01" class="form-control" readonly />
                     </div>
                 </div>
                 <div class="form-group row">
@@ -89,6 +88,12 @@
                     <div class="col-sm-9">
                         <input type="number" name="payment_amount" id="inputPaymentAmountEdit" step="0.01"
                             class="form-control" required />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputFilePayment" class="col-sm-3 col-form-label">Upload File</label>
+                    <div class="col-sm-9">
+                        <input type="file" id="inputFilePayment" name="file" class="form-control" />
                     </div>
                 </div>
             </div>
@@ -108,6 +113,12 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </x-modal>
+
+    {{-- Bukti Bayar --}}
+    <x-modal title="Bukti Bayar" idModal="showImgModal">
+        <div class="modal-body">
         </div>
     </x-modal>
 
@@ -137,6 +148,12 @@
             tbody.on('click', '.btn-detail-customer', (event) => {
                 const idEl = $(event.target).data('customer')
                 handleDetailCustomerButtonCLick(idEl)
+            })
+
+            tbody.on('click', '.btn-show-img', (event) => {
+                event.preventDefault()
+                const filename = $(event.target).data('filename');
+                handleShowImg(filename)
             })
         });
 
@@ -183,7 +200,8 @@
                 date,
                 due_date,
                 price,
-                payment_amount
+                payment_amount,
+                file,
             } = data;
 
             // "  <a href='#' class='btn-detail-customer text-muted' data-customer="+customer.id+">lihat detail...</a>"
@@ -196,6 +214,7 @@
                         <td>${rupiah(payment_amount)} <span class="badge badge-opacity-${(price > payment_amount) ? 'danger' : 'success'}"><i class="mdi mdi-arrow-${(price> payment_amount) ? 'down' : 'up'}-thick"></i></span></td>
                         <td>
                             <button class="btn-edit btn btn-sm btn-warning btn-action">Edit</button>
+                            <button class="${file !== null ? 'btn-show-img btn-info' :'btn-dark'} btn btn-sm btn-action" data-filename="${file}" title="Lihat Bukti Pembayaran">${file !== null ? 'Lihat' : 'Belum Ada'}</button>
                         </td>
                     </tr>`;
         };
@@ -268,6 +287,34 @@
 
                     // Tampilkan modal edit
                     $('#editPaymentModal').modal('show');
+                }
+            })
+        }
+
+        const handleShowImg = (filename) => {
+            $.ajax({
+                url: `/api/filename?path=${filename}`,
+                type: "GET",
+                beforeSend: () => setButtonDisabled($('.btn-action'), true),
+                complete: () => setButtonDisabled($('.btn-action'), false),
+                success: (result, status, xhr) => {
+                    const mimeType = xhr.getResponseHeader('Content-Type');
+                    const blob = new Blob([result], {
+                        type: mimeType
+                    });
+                    const url = URL.createObjectURL(blob);
+
+                    // Create an img element and set its src attribute to the object URL
+                    const imgElement = $('<img>', {
+                        src: url,
+                        alt: 'Image',
+                        width: '100%', // adjust as needed
+                    });
+                    $('#showImgModal .modal-body').html(imgElement);
+                    $('#showImgModal').modal('show')
+                },
+                xhrFields: {
+                    responseType: 'blob',
                 }
             })
         }

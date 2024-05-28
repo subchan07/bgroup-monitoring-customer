@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('due_date');
             $table->decimal('price', 12);
             $table->decimal('payment_amount', 12);
+            $table->string('file')->nullable();
             $table->enum('status', ['terminated', 'suspended', 'pending', 'cancelled', 'active'])->default('active');
             $table->timestamps();
         });

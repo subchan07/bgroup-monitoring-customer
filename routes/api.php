@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Http\Request;
@@ -24,4 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/payment/annual-summary', [PaymentController::class, 'getAnnualPaymentSummary']);
     Route::apiResource('/payment', PaymentController::class)->except(['store', 'destroy']);
+
+    Route::get('/filename', [FileController::class, 'show']);
 });

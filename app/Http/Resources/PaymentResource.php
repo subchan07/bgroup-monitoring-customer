@@ -23,6 +23,7 @@ class PaymentResource extends JsonResource
             'price' => $this->price,
             'payment_amount' => $this->payment_amount,
             'status' => $this->status,
+            'file' => $this->file,
             'material' => new MaterialResource($this->material),
             'customer' => new CustomerResource($this->customer),
         ];

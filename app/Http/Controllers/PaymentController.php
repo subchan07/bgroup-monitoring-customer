@@ -12,6 +12,7 @@ use App\Http\Resources\PaymentResource;
 use App\Http\Resources\PaymentCollection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
@@ -52,6 +53,7 @@ class PaymentController extends Controller
             'date' => 'required|date',
             'due_date' => 'required|date',
             'payment_amount' => 'required|decimal:0,2',
+            'file' => 'nullable|mimes:jpg,jpeg,png'
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +63,20 @@ class PaymentController extends Controller
             ], 400));
         }
 
-        $validated = $validator->validate();
+        $validated = $request->except(['file']);
+
+        $file = $request->file('file');
+        if ($file) {
+            $oldFile = $result->file;
+            if ($oldFile != null && Storage::exists($oldFile)) {
+                Storage::delete($oldFile);
+            }
+
+            // upload new file
+            $path = $file->store('payment');
+            $validated['file'] = $path;
+        }
+
         $result->update($validated);
 
         return response()->json([

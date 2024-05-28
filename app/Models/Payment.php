@@ -10,7 +10,7 @@ class Payment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['material_id', 'customer_id', 'date', 'due_date', 'price', 'payment_amount', 'status'];
+    protected $fillable = ['material_id', 'customer_id', 'date', 'due_date', 'price', 'payment_amount', 'status', 'file'];
 
 
     public function material(): BelongsTo

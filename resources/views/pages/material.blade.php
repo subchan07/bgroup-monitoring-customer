@@ -202,7 +202,7 @@
 
     {{-- Bayar Modal --}}
     <x-modal title="Bayar Data" idModal="bayarMaterialModal">
-        <form action="#" method="POST" id="paymentForm">
+        <form action="#" method="POST" id="paymentForm" enctype="multipart/form-data">
             @csrf
             <div class="modal-body">
                 <input type="hidden" name="material_id" id="inputIdPayment">
@@ -240,6 +240,12 @@
                         <input type="number" name="payment_amount" id="inputPaymentAmount" class="form-control"
                             step="0.01" required />
                         <p class="text-muted my-0">Ubah untuk data bayar berikutnya.</p>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="inputFilePayment" class="col-sm-3 col-form-label">Upload File</label>
+                    <div class="col-sm-9">
+                        <input type="file" id="inputFilePayment" name="file" class="form-control" />
                     </div>
                 </div>
             </div>
