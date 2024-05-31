@@ -32,7 +32,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="with-welcome-text">
+<body class="with-welcome-text sidebar-icon-only">
     <div class="container-scroller">
         <!-- partial navbar -->
         @include('includes.topbar')
