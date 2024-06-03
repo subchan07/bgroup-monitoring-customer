@@ -2,7 +2,7 @@ const yearPotensiProfit = $(".yearPotensiProfit");
 const yearPrevProfitTotal = $(".yearPrevProfitTotal");
 
 const filterMaterialChart = $("#filterChart");
-const titleStatistikChart = $('#titleStatistik')
+const titleStatistikChart = $("#titleStatistik");
 const filterStatistikChart = $("#filterStatistikQ");
 const filterStatistikDate = $("#filterStatistikDate");
 const filterStatistikMonth = $("#filterStatistikMonth");
@@ -24,28 +24,22 @@ const months = [
     "Dec",
 ];
 
-const fetchStatisticDataEndpoints = [
-    "jp",
-    "mba",
-    "nugroho",
-    "pilar",
-    "rahluna",
-    "zelea",
-];
-
 const fetchAllStatisticData = async (object) => {
-    titleStatistikChart.html('Loading...')
+    try {
+        titleStatistikChart.html("Loading...");
 
-    const responses = await Promise.all(
-        fetchStatisticDataEndpoints.map(async (endpoint) => {
-            const { q, val } = object;
-            const { data, author } = await $.get(
-                `/api/data/${endpoint}?q=${q}&val=${val}`
-            );
-            return { label: endpoint, value: data };
-        })
-    ).finally(() => titleStatistikChart.html('Statistic Database'));
-    initChartStatistic("statistikCustomer", responses);
+        const { q, val } = object;
+        const response = await $.get(`/api/getAllStatistik?q=${q}&val=${val}`);
+        const data = Object.keys(response).map((key) => ({
+            label: key,
+            value: response[key].data,
+        }));
+
+        titleStatistikChart.html("Statistic Database");
+        initChartStatistic("statistikCustomer", data);
+    } catch (error) {
+        console.log(error);
+    }
 };
 
 const displayRecentEvent = (keterangan, due_date, price) => {

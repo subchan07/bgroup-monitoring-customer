@@ -38,7 +38,7 @@ class DataAggregatorServiceImpl implements DataAggregatorService
                 $conditions[] = [DB::Raw("YEAR($column)"), '=', $val];
                 break;
             case 'month':
-                [$month, $year] = explode('-', $val);
+                [$year, $month] = explode('-', $val);
                 $conditions[] = [DB::Raw("MONTH($column)"), '=', $month];
                 $conditions[] = [DB::Raw("YEAR($column)"), '=', $year];
                 break;
