@@ -22,13 +22,6 @@
                                 aria-controls="overview" aria-selected="true">Overview</a>
                         </li>
                     </ul>
-                    <div>
-                        {{-- <div class="btn-wrapper">
-                            <a href="#" class="btn btn-otline-dark"><i class="icon-printer"></i> Print</a>
-                            <a href="#" class="btn btn-primary text-white me-0"><i class="icon-download"></i>
-                                Export</a>
-                        </div> --}}
-                    </div>
                 </div>
                 <div class="tab-content tab-content-basic">
                     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
@@ -79,7 +72,43 @@
                                                     </div>
                                                 </div>
                                                 <div class="chartjs-wrapper mt-4">
-                                                    <canvas id="performanceLine" width=""></canvas>
+                                                    <canvas id="materialChart" width=""></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 d-flex flex-column">
+                                <div class="row flex-grow">
+                                    <div class="col-12 col-lg-4 col-lg-12 grid-margin stretch-card">
+                                        <div class="card card-rounded">
+                                            <div class="card-body">
+                                                <div class="d-sm-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h4 class="card-title card-title-dash" id="titleStatistik">Statistik Database</h4>
+                                                    </div>
+                                                    <div>
+                                                        <form method="GET">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <select name="q" id="filterStatistikQ" class="form-select form-select-sm text-dark">
+                                                                    <option value="year">Tahun</option>
+                                                                    <option value="month">Bulan</option>
+                                                                    <option value="date">Tanggal</option>
+                                                                </select>
+                                                                <select id="filterStatistikYear" class="filterStatistik form-select form-select-sm text-dark">
+                                                                    @for ($year = date('Y'); $year >= 2023; $year--)
+                                                                        <option value="{{ $year }}">{{ $year }}</option>
+                                                                    @endfor
+                                                                </select>
+                                                                <input style="display: none;" type="month" id="filterStatistikMonth" class="filterStatistik form-control form-control-sm" disabled>
+                                                                <input style="display: none;" type="date" id="filterStatistikDate" class="filterStatistik form-control form-control-sm" disabled>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <div class="chartjs-wrapper mt-4">
+                                                    <canvas id="statistikCustomer" width=""></canvas>
                                                 </div>
                                             </div>
                                         </div>

@@ -32,11 +32,11 @@
     // });
 })(jQuery);
 
-const initChart = (dataset) => {
-    const ctx = document.getElementById("performanceLine");
+const initChartMaterial = (target, dataset) => {
+    const ctx = document.getElementById(target);
 
-    if (window.performanceLineChart !== undefined) {
-        window.performanceLineChart.destroy();
+    if (window.initChartMaterial !== undefined) {
+        window.initChartMaterial.destroy();
     }
 
     let graphGradient = ctx.getContext("2d");
@@ -146,24 +146,89 @@ const initChart = (dataset) => {
                 },
             },
         },
-        plugins: [
-            {
-                // afterDatasetUpdate: function (chart, args, options) {
-                //     const chartId = chart.canvas.id;
-                //     let i;
-                //     const legendId = `${chartId}-legend`;
-                //     const ul = document.createElement("ul");
-                //     for (i = 0; i < chart.data.datasets.length; i++) {
-                //         ul.innerHTML += `<li>
-                //                             <span style="background-color: ${chart.data.datasets[i].borderColor}"></span>
-                //                             ${chart.data.datasets[i].label}
-                //                         </li>`;
-                //     }
-                //     return document.getElementById(legendId).appendChild(ul);
-                // },
-            },
-        ],
+        plugins: [],
     });
 
-    window.performanceLineChart = chart;
+    window.initChartMaterial = chart;
+};
+
+const initChartStatistic = (target, dataset) => {
+    const ctx = document.getElementById(target).getContext("2d");
+
+    if (window.initChartStatistic !== undefined) {
+        window.initChartStatistic.destroy();
+    }
+
+    let chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: dataset.map((d) => d.label),
+            datasets: [
+                {
+                    label: "Data",
+                    data: dataset.map((d) => d.value),
+                    borderColor: "#1F3BB3",
+                    backgroundColor: "rgba(26, 115, 232, 0.18)",
+                    borderWidth: 1,
+                },
+            ],
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+                bar: {
+                    borderWidth: 2,
+                },
+            },
+            scales: {
+                y: {
+                    border: {
+                        display: false,
+                    },
+                    grid: {
+                        display: true,
+                        color: "#F0F0F0",
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        beginAtZero: false,
+                        autoSkip: false,
+                        maxTicksLimit: 4,
+                        color: "#6B778C",
+                        font: {
+                            size: 10,
+                        },
+                    },
+                },
+                x: {
+                    border: {
+                        display: false,
+                    },
+                    grid: {
+                        display: false,
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        beginAtZero: false,
+                        autoSkip: false,
+                        maxTicksLimit: 7,
+                        color: "#6B778C",
+                        font: {
+                            size: 10,
+                        },
+                    },
+                },
+            },
+            plugins: {
+                legend: {
+                    display: false,
+                },
+            },
+        },
+        plugins: [],
+    });
+
+    window.initChartStatistic = chart;
 };

@@ -13,6 +13,15 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+Route::prefix('/data')->group(function () {
+    Route::get('/jp', [App\Http\Controllers\AnotherDatabase\JpController::class, 'list']);
+    Route::get('/mba', [App\Http\Controllers\AnotherDatabase\MbaController::class, 'list']);
+    Route::get('/nugroho', [App\Http\Controllers\AnotherDatabase\NugrohoController::class, 'list']);
+    Route::get('/pilar', [App\Http\Controllers\AnotherDatabase\PilarController::class, 'list']);
+    Route::get('/rahluna', [App\Http\Controllers\AnotherDatabase\RahlunaController::class, 'list']);
+    Route::get('/zelea', [App\Http\Controllers\AnotherDatabase\ZeleaController::class, 'list']);
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/current', [AuthController::class, 'current']);
     Route::post('/user/profile', [AuthController::class, 'editProfile']);
