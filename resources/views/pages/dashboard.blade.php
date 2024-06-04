@@ -97,7 +97,7 @@
                                                                     <option value="date">Tanggal</option>
                                                                 </select>
                                                                 <select id="filterStatistikYear" class="filterStatistik form-select form-select-sm text-dark">
-                                                                    @for ($year = date('Y'); $year >= 2023; $year--)
+                                                                    @for ($year = date('Y'); $year >= 2020; $year--)
                                                                         <option value="{{ $year }}">{{ $year }}</option>
                                                                     @endfor
                                                                 </select>

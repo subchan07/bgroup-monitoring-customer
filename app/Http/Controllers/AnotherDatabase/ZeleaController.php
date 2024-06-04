@@ -33,15 +33,15 @@ class ZeleaController extends Controller
         return [
             [
                 'table_name' => 'inv_detail',
-                'column_name' => 'first_create'
+                'column_name' => 'tanggal_dibuat'
             ],
             [
                 'table_name' => 'new_invoice',
-                'column_name' => 'first_create'
+                'column_name' => 'tanggal_dibuat'
             ],
             [
                 'table_name' => 'new_oprasional',
-                'column_name' => 'first_create'
+                'column_name' => 'tanggal'
             ],
             [
                 'table_name' => 'new_po',
@@ -49,7 +49,7 @@ class ZeleaController extends Controller
             ],
             [
                 'table_name' => 'new_project',
-                'column_name' => 'first_create'
+                'column_name' => 'created_at'
             ],
             [
                 'table_name' => 'oprasional_detail',
@@ -61,15 +61,15 @@ class ZeleaController extends Controller
             ],
             [
                 'table_name' => 'project_detail',
-                'column_name' => 'first_create'
+                'column_name' => 'tanggal'
             ],
             [
                 'table_name' => 'sub_inv',
-                'column_name' => 'first_create'
+                'column_name' => 'tanggal_dibuat'
             ],
             [
                 'table_name' => 'tbl_absensi',
-                'column_name' => 'first_create'
+                'column_name' => 'created_at'
             ],
             [
                 'table_name' => 'tbl_customer',
@@ -77,11 +77,11 @@ class ZeleaController extends Controller
             ],
             [
                 'table_name' => 'tbl_history_produk',
-                'column_name' => 'first_create'
+                'column_name' => 'created_at'
             ],
             [
                 'table_name' => 'tbl_produk',
-                'column_name' => 'first_create'
+                'column_name' => 'created_at'
             ],
             [
                 'table_name' => 'tbl_satuan',
