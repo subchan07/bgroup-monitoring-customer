@@ -27,9 +27,6 @@
                 $.cookie("staradmin2-pro-banner", "true", { expires: date });
             });
     });
-    // iconify.load('icons.svg').then(function() {
-    //   iconify(document.querySelector('.my-cool.icon'));
-    // });
 })(jQuery);
 
 const initChartMaterial = (target, dataset) => {
@@ -47,7 +44,6 @@ const initChartMaterial = (target, dataset) => {
     let chart = new Chart(ctx, {
         type: "line",
         data: {
-            // labels: ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DES"],
             datasets: [
                 {
                     label: "This week",
@@ -55,7 +51,7 @@ const initChartMaterial = (target, dataset) => {
                     backgroundColor: saleGradientBg,
                     borderColor: ["#1F3BB3"],
                     borderWidth: 1.5,
-                    fill: true, // 3: no fill
+                    fill: true, 
                     pointBorderWidth: 1,
                     pointRadius: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
                     pointHoverRadius: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
@@ -174,7 +170,7 @@ const initChartStatistic = (target, dataset) => {
             ],
         },
         options: {
-            indexAxis: "y",
+            // indexAxis: "y",
             responsive: true,
             maintainAspectRatio: false,
             elements: {
@@ -195,7 +191,6 @@ const initChartStatistic = (target, dataset) => {
                     ticks: {
                         beginAtZero: false,
                         autoSkip: false,
-                        maxTicksLimit: 4,
                         color: "#6B778C",
                         font: {
                             size: 10,
@@ -213,10 +208,10 @@ const initChartStatistic = (target, dataset) => {
                     ticks: {
                         beginAtZero: false,
                         autoSkip: false,
-                        maxTicksLimit: 7,
+                        maxTicksLimit: 6,
                         color: "#6B778C",
                         font: {
-                            size: 10,
+                            size: 12,
                         },
                     },
                 },
