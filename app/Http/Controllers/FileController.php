@@ -2,25 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function show(Request $request): Response
+    public function allFile(Request $request): JsonResponse
     {
-        $filename = $request->query('path');
+        $directory = $request->query('directory');
+        $files = Storage::disk('local')->allFiles($directory);
 
-        if (!Storage::exists($filename)) {
-            return response()->json(['message' => 'File not found'], 404);
+        $files = collect($files)->map(function ($file) {
+            $lastModified = Storage::lastModified($file);
+            return [
+                'name' => basename($file),
+                'original' => $file,
+                'size' => Storage::size($file),
+                'last_modified' => Carbon::createFromTimestamp($lastModified)->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json(['success' => true, 'data' => $files]);
+    }
+
+    public function show(Request $request)
+    {
+        $pathFile = $request->query('path');
+
+        if (!Storage::exists($pathFile)) {
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
         }
 
-        $file = Storage::get($filename);
-        $mimeType = Storage::mimeType($filename);
+        $file = Storage::get($pathFile);
+        $mimeType = Storage::mimeType($pathFile);
         return response($file)->header('Content-Type', $mimeType);
+    }
+
+    public function delete(Request $request)
+    {
+        $pathFile = $request->input('path');
+
+        if (!Storage::exists($pathFile)) {
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
+        }
+
+        Storage::delete($pathFile);
+        return response()->json(['success' => true, 'message' => 'File berhasil dihapus']);
+    }
+
+    public function download(Request $request)
+    {
+        $pathFile = $request->input('path');
+
+        if (!Storage::exists($pathFile)) {
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
+        }
+
+        return Storage::download($pathFile);
     }
 }

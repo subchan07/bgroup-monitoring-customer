@@ -30,7 +30,7 @@ return [
     */
 
     'connections' => [
-        'laporanu_mba' => [
+        env('DB_DATABASE_MBA') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -50,7 +50,7 @@ return [
             ]) : [],
         ],
 
-        'laporanu_nugroho' => [
+        env('DB_DATABASE_NUGROHO') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -70,7 +70,7 @@ return [
             ]) : [],
         ],
 
-        'laporanu_pengiriman' => [
+        env('DB_DATABASE_PENGIRIMAN') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -90,7 +90,7 @@ return [
             ]) : [],
         ],
 
-        'laporanu_pilar' => [
+        env('DB_DATABASE_PILAR') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -110,7 +110,7 @@ return [
             ]) : [],
         ],
 
-        'laporanu_rahluna' => [
+        env('DB_DATABASE_RAHLUNA') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -130,7 +130,7 @@ return [
             ]) : [],
         ],
 
-        'laporanu_zelea' => [
+        env('DB_DATABASE_ZELEA') => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
@@ -263,7 +263,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+            'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_') . '_database_'),
         ],
 
         'default' => [

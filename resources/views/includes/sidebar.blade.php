@@ -25,6 +25,12 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('kelola-file') }}">
+                <i class="mdi mdi-file-multiple"></i>
+                <span class="menu-title">Kelola File Database</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <form action="{{ route('logout') }}" method="POST" class="nav-link logoutForm">
                 @csrf
                 <button type="submit" class="btn btn-sm p-0 m-0">

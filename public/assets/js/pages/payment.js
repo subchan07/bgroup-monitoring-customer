@@ -171,7 +171,7 @@ const handleEditButtonClick = (idEl) => {
 
 const handleShowImg = (filename) => {
     $.ajax({
-        url: `/api/filename?path=${filename}`,
+        url: `/api/file/show?path=${filename}`,
         type: "GET",
         beforeSend: () => setButtonDisabled($(".btn-action"), true),
         complete: () => setButtonDisabled($(".btn-action"), false),

@@ -13,7 +13,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('getAllStatistik', [DashboardController::class, 'getAllStatistik']);
 
@@ -29,5 +28,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payment/annual-summary', [PaymentController::class, 'getAnnualPaymentSummary']);
     Route::apiResource('/payment', PaymentController::class)->except(['store', 'destroy']);
 
-    Route::get('/filename', [FileController::class, 'show']);
+    Route::get('/file/show', [FileController::class, 'show']);
+    Route::get('/file', [FileController::class, 'allFile']);
+    Route::post('/file/download', [FileController::class, 'download']);
+    Route::post('/file/delete', [FileController::class, 'delete']);
 });

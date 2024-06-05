@@ -39,4 +39,8 @@ Route::middleware('auth')->group(function () {
     Route::get('payment', function () {
         return view('pages.payment');
     })->name('payment');
+
+    Route::get('kelola-file', function () {
+        return view('pages.file-manager');
+    })->name('kelola-file');
 });
