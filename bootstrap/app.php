@@ -19,6 +19,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->withSchedule(function (Schedule $schedule) {
-        $schedule->command('backup:clean')->dailyAt('18-00-00');
-        $schedule->command('backup:run --only-db')->dailyAt('18-30-00');
+        $schedule->command('backup:clean')->timezone('Asia/Jakarta')->dailyAt('01:00');
+        $schedule->command('backup:run --only-db')->timezone('Asia/Jakarta')->dailyAt('01:30');
     })->create();
