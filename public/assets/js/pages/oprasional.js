@@ -39,6 +39,10 @@ const getAllOprasional = () => {
                 tbody.append(displayTbody(data));
             });
 
+            if(datas.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center">Data tidak ditemukan.</td></tr>')
+            }
+
             if (datas.length > 0) {
                 loadDataTable("#table");
             }
