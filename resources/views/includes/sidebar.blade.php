@@ -25,9 +25,15 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('oprasional') }}">
+                <i class="mdi mdi-table menu-icon"></i>
+                <span class="menu-title">Oprasional</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{{ route('kelola-file') }}">
-                <i class="mdi mdi-file-multiple"></i>
-                <span class="menu-title">Kelola File Database</span>
+                <i class="mdi mdi-file-outline menu-icon"></i>
+                <span class="menu-title">Kelola File</span>
             </a>
         </li>
         <li class="nav-item">

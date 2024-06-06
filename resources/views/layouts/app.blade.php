@@ -29,7 +29,7 @@
     <!-- endinject -->
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.png') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([])
 </head>
 
 <body class="with-welcome-text sidebar-icon-only">

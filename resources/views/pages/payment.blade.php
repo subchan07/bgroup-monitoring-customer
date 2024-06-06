@@ -1,10 +1,5 @@
 @extends('layouts.app')
 
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/vendors/select2-bootstrap-theme/select2-bootstrap.min.css') }}">
-@endpush
-
 @section('content')
     <div class="row">
         <div class="col-lg-12 grid-margin stretch-card">

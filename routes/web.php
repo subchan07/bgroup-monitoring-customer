@@ -40,6 +40,10 @@ Route::middleware('auth')->group(function () {
         return view('pages.payment');
     })->name('payment');
 
+    Route::get('oprasional', function () {
+        return view('pages.oprasional');
+    })->name('oprasional');
+
     Route::get('kelola-file', function () {
         return view('pages.file-manager');
     })->name('kelola-file');
